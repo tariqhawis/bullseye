@@ -77,11 +77,11 @@ let i = 0;
 const currentPath = process.cwd();
 const projDir = "/home/tariq/bulleyes";
 let inputPath = null;
-//const benchPath = "/home/tariq/benchmark/zd-155";
-const benchPath = "/home/tariq/benchmark/zd-470";
-inputPath = "/home/tariq/bulleyes/raw-data/totalzd/zd526.txt";
+const benchPath = "/home/tariq/benchmark/zd-155";
+//const benchPath = "/home/tariq/benchmark/zd-470";
+//inputPath = "/home/tariq/bulleyes/raw-data/totalzd/zd526.txt";
 //inputPath = "/home/tariq/bulleyes/raw-data/cveWithScore.txt";
-//inputPath = "/home/tariq/bulleyes/raw-data/compare/zd123/pkgsWithSink.txt";
+inputPath = "/home/tariq/bulleyes/raw-data/compare/zd123/pkgsWithSink.txt";
 //const benchPath = "/data/benchmark/excelDS/";
 //const inputPath = "/home/tariq/bulleyes/dataset/excelDataset.txt";
 //const inputPath = "/home/tariq/bulleyes/raw-data/totalzd/zd526.txt";
@@ -128,7 +128,7 @@ else {
 const logText = new Date().toISOString().replace(/:/g, "-").replace(/T/g, "_").split(".")[0];
 const suffix = `${input ? input.replace(/.*\/([^\/]+)$/, "$1") : "default"}.${logText}`;
 const outputFile = `${projDir}/raw-data/${argv.tool.replace(/.*\/([^\/]+)$/, "$1")}.${suffix}.json`;
-const tempFile = `${projDir}/raw-data/${argv.tool.replace(/.*\/([^\/]+)$/, "$1")}.${suffix}.tmp.txt`;
+const tempFile = `/home/tariq/bulleyes/raw-data/fuzzproto.mjs.pkgsWithSink.txt.2025-03-25_19-30-03.tmp.txt`;
 const logFile = "/home/tariq/bulleyes/logs/" + suffix + ".log";
 const pLimit = lib.default;
 const limit = pLimit(argv.parallel || 1); // Adjust concurrency level
@@ -207,7 +207,7 @@ async function processQueue(file) {
           verbose: pkg?.options?.verbose ?? false,
           sandbox: pkg?.options?.sandbox ?? true,
           vm: pkg?.options?.vm ?? true,
-          fixFuzz: pkg?.options?.fixFuzz ?? true,
+          fixFuzz: pkg?.options?.fixFuzz ?? false,
           maxTestFiles: pkg?.options?.maxTestFiles ?? 1500,
           multiVectors: pkg?.options?.multiVectors ?? false,
         },
@@ -289,11 +289,15 @@ async function processQueue(file) {
   );
   await Promise.all(tasks);
   //read tempFile, fix [] (add [ at the beginning of the file, and replace , with ] at the end), refine the results, and write to outputFile
-  if (fs.existsSync(tempFile)) {
-    const tempData = fs.readFileSync(tempFile, { encoding: "utf8" });
-    const tempResults = JSON.parse(tempData.replace(/,\n$/, "]").replace(/^\{/, "[{\n"));
-    const refinedRes = await refineReport(tempResults);
-    fs.writeFileSync(outputFile, refinedRes, "utf8");
+  try {
+    if (fs.existsSync(tempFile)) {
+      const tempData = fs.readFileSync(tempFile, { encoding: "utf8" });
+      const tempResults = JSON.parse(tempData.replace(/,\n$/, "]").replace(/^\{/, "[{\n"));
+      const refinedRes = await refineReport(tempResults);
+      fs.writeFileSync(outputFile, JSON.stringify(refinedRes), "utf8");
+    }
+  } catch (error) {
+    console.log(error);
   }
   console.log("All packages processed!");
   //results=Object.values(pkgList.reduce((acc, obj) => {const key = `${obj.results.entryPoint}-${obj.results.sinkLocation?.setProp || "null"}`;  if (!acc[key]) acc[key] = obj; return acc;}, {}));
@@ -568,37 +572,80 @@ async function refineReport(pkgReports) {
       return acc;
     }, {})
   );
-  refinedRes.map(async (pkg) => {
+  for (const pkg of refinedRes) {
     const [, pkgName, version] = pkg.package.match(/^(@?[^@]+)@?(.*)/);
     const cveMap = new Map(); // Map each package to its CVEs
+    const ppMap = new Map();
     const advisories = await githubRequest(`/advisories?ecosystem=npm&affects=${pkgName}`);
-    if (pkg.results && pkg.results.length > 0) {
-      for (const result of pkg.results) {
-        // take the last part of the entry point
-        const entryFn =
-          result.entryPoint && result.entryPoint.includes(".") ? result.entryPoint.split(".").pop() : result.entryPoint;
-        if (entryFn) {
-          if (advisories.length > 0) {
-            for (const advisory of advisories) {
-              const advDesc = advisory.description;
-              const CVE = advisory.cve_id || advisory.ghsa_id;
-              if (advisory.vulnerabilities[0].package.name === pkgName) {
-                cveMap.get(pkgName).push(CVE);
-                if (advDesc.includes(`${entryFn}()`)) {
-                  cveMap.get(pkgName).push(CVE);
-                }
-                if (advDesc.includes(`${sinkLocation.setProp}`) || advDesc.includes(`${sinkLocation.setProto}`)) {
-                  cveMap.get(pkgName).push(CVE);
-                }
+    if (advisories.length > 0)
+      if (pkg.results && pkg.results.length > 0) {
+        for (const result of pkg.results) {
+          // take the last part of the entry point
+          const entryFn =
+            result.entryPoint && result.entryPoint.includes(".")
+              ? result.entryPoint.split(".").pop()
+              : result.entryPoint;
+          const sinks = Object.values(result.sinkLocation)
+            .filter(Boolean)
+            .map((s) => {
+              console.log(s);
+              const match = s.match(/(at\s+(\w+))?(?:.*\/)?([^\/:\)]+)/);
+              if (match) {
+                return {
+                  functionName: match[2] || "N/A", // Default to "N/A" if function name is missing
+                  fileName: match[3], // Extracted file name
+                };
+              } else {
+                return {
+                  functionName: "N/A", // Default to "N/A" if no match
+                  fileName: "N/A", // Default to "N/A" if no match
+                };
               }
-              // add cveMap to the pkg object
-              pkg.cveHistory = Array.from(cveMap);
+            });
+          if (entryFn) {
+            if (advisories.length > 0) {
+              for (const advisory of advisories) {
+                const advDesc = advisory.description;
+                const CVE = advisory.cve_id || advisory.ghsa_id;
+                if (advisory.vulnerabilities[0].package.name === pkgName) {
+                  // Check if the key (pkgName) exists in the Map
+                  if (!cveMap.has(pkgName)) {
+                    // If the key doesn't exist, initialize it with an empty array
+                    cveMap.set(pkgName, []);
+                  }
+                  if (!cveMap.get(pkgName).includes(CVE)) cveMap.get(pkgName).push(CVE);
+                  if (advDesc.includes(`${entryFn}()`)) {
+                    if (!ppMap.has(pkgName))
+                      // If the key doesn't exist, initialize it with an empty array
+                      ppMap.set(pkgName, []);
+
+                    if (!ppMap.get(pkgName).includes(CVE)) ppMap.get(pkgName).push(CVE);
+                  }
+                  if (
+                    sinks.some((sink) => {
+                      // Check if the searchString matches any key or value in the log object
+                      return Object.entries(sink).some(([key, value]) => {
+                        // Convert both key and value to strings and check for a match
+                        return advDesc.includes(key) || advDesc.includes(String(value));
+                      });
+                    })
+                  ) {
+                    if (!ppMap.has(pkgName))
+                      // If the key doesn't exist, initialize it with an empty array
+                      ppMap.set(pkgName, []);
+
+                    if (!ppMap.get(pkgName).includes(CVE)) ppMap.get(pkgName).push(CVE);
+                  }
+                }
+                // add cveMap to the pkg object
+                pkg.cveHistory = Array.from(cveMap.get(pkgName) || []);
+                pkg.ppHistory = Array.from(ppMap.get(pkgName) || []);
+              }
             }
           }
         }
       }
-    }
-  });
+  }
   // let advisories;
   // try {
   //   console.log("Searching for relevant CVEs ...");
