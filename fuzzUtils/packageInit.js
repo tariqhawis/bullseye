@@ -363,8 +363,11 @@ function findTestFiles(pkgPath, pakgName = null, fn = null) {
     fnDir,
     fnName,
     fn2 = pakgName,
-    pkgDir = pakgName.replace(/^(\d)/, "a$1").replace(/^@/, "").replace(/[:\-\./]/g, "_"),
-    testParentDir = `${pkgPath}/{node_modules/${pakgName},repo-${pkgDir}}`; 
+    pkgDir = pakgName
+      .replace(/^(\d)/, "a$1")
+      .replace(/^@/, "")
+      .replace(/[:\-\./]/g, "_"),
+    testParentDir = `${pkgPath}/{node_modules/${pakgName},repo-${pkgDir}}`;
   // if fn is defined, use the function path as test file path (e.g.,locutus.c.math.abs: locutus/c/math/abs.test.js)
   // pluse, consider having test word in any format in the test file name (e.g., abs.test.js, abs.spec.js, abs.index.js, test-abs.js)
   try {
@@ -376,21 +379,17 @@ function findTestFiles(pkgPath, pakgName = null, fn = null) {
       ///test/EleventyExtensionMapTest.js
       // testFileArr has all possible test file names (e.g., abs.test.js, abs.spec.js, abs.index.js, test-abs.js)
       const testFileArr1 = ["{t,T}est", "{s,S}pec", "{i,I}ndex", "{c,C}offee"].map(
-        (t) => `${testParentDir}/${fnDir || "**"}/${fnName || "*"}{,.,-}${t}.{js,coffee,ts,cjs,mjs}`
+        (t) => `${testParentDir}/${fnDir || "**" || fnName}/${fnName || "*"}{,.,-}${t}.{js,coffee,ts,cjs,mjs}`
       );
       const testFileArr2 = ["{t,T}est", "{s,S}pec", "{i,I}ndex", "{c,C}offee"].map(
-        (t) => `${testParentDir}/${fnDir || "**"}/${t}{,.,-}${fnName || "*"}.{js,coffee,ts,cjs,mjs}`
+        (t) => `${testParentDir}/${fnDir || "**" || fnName}/${t}{,.,-}${fnName || "*"}.{js,coffee,ts,cjs,mjs}`
       );
       const testFileArr3 = ["{t,T}est", "{s,S}pec", "{i,I}ndex", "{c,C}offee"].map(
-        (t) => `${testParentDir}/${fnDir || "**"}/${fn2 || "*"}{,.,-}${t}.{js,coffee,ts,cjs,mjs}`
+        (t) => `${testParentDir}/${fnDir || "**" || fnName}/${fn2 || "*"}{,.,-}${t}.{js,coffee,ts,cjs,mjs}`
       );
       const testFileArr4 = ["{t,T}est", "{s,S}pec", "{i,I}ndex", "{c,C}offee"].map(
-        (t) => `${testParentDir}/${fnDir || "**"}/${t}{,.,-}${fn2 || "*"}.{js,coffee,ts,cjs,mjs}`
+        (t) => `${testParentDir}/${fnDir || "**" || fnName}/${t}{,.,-}${fn2 || "*"}.{js,coffee,ts,cjs,mjs}`
       );
-      const allTestFiles = [...testFileArr1, ...testFileArr2, ...testFileArr3, ...testFileArr4]; // TODO: 1- add more patterns 2- the path can start with test/__tests__/tests
-      testFiles = glob.sync([...allTestFiles], {
-        ignore: [`${testParentDir}/**/node_modules/**`], // Ignores only sub-package node_modules
-      });
       console.log(testFiles.length);
     } else {
       const tfArr1 = ["{t,T}est", "{s,S}pec", "{i,I}ndex", "{c,C}offee"].map(
