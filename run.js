@@ -128,7 +128,7 @@ else {
 const logText = new Date().toISOString().replace(/:/g, "-").replace(/T/g, "_").split(".")[0];
 const suffix = `${input ? input.replace(/.*\/([^\/]+)$/, "$1") : "default"}.${logText}`;
 const outputFile = `${projDir}/raw-data/${argv.tool.replace(/.*\/([^\/]+)$/, "$1")}.${suffix}.json`;
-const tempFile = `/home/tariq/bulleyes/raw-data/fuzzproto.mjs.pkgsWithSink.txt.2025-03-25_19-30-03.tmp.txt`;
+const tempFile = `${projDir}/raw-data/${argv.tool.replace(/.*\/([^\/]+)$/, "$1")}.${suffix}.txt`;
 const logFile = "/home/tariq/bulleyes/logs/" + suffix + ".log";
 const pLimit = lib.default;
 const limit = pLimit(argv.parallel || 1); // Adjust concurrency level
@@ -254,7 +254,7 @@ async function processQueue(file) {
         let results = [];
         //results = await exploitPkg(pkgObj);
         //results = await
-        //await sandboxRun(pkgObj, pkgLib, argv.timeout);
+        await sandboxRun(pkgObj, pkgLib, argv.timeout);
         //pkgList.push({ package_name: pkgName, version: version });
         //if (results && results.length > 0) {
         // if (argv.output === "stdout") console.log(JSON.stringify({ package_name: pkgName, version: version, results }));
@@ -684,4 +684,62 @@ async function refineReport(pkgReports) {
   //   console.log("error while processing advisories: ", e.message);
   // }
   return refinedRes;
+}
+
+async function githubRequest(query, method = "GET", API = "token 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") {
+  try {
+    const { Octokit } = await import("octokit");
+    //const API = 'token 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' //kluban's
+    //const octokit = new Octokit({});
+    const octokit = new Octokit({
+      auth: API,
+    });
+    switch (method) {
+      case "GET":
+        const nextPattern = /(?<=<)([\S]*)(?=>; rel="Next")/i;
+        let pagesRemaining = true;
+        let data = [];
+
+        while (pagesRemaining) {
+          const response = await octokit.request(`GET ${query}`, {
+            per_page: 100,
+            headers: {
+              "X-GitHub-Api-Version": "2022-11-28",
+            },
+          });
+
+          const parsedData = parseData(response.data);
+          data = [...data, ...parsedData];
+
+          const linkHeader = response.headers.link;
+
+          pagesRemaining = linkHeader && linkHeader.includes(`rel=\"next\"`);
+
+          if (pagesRemaining) {
+            query = linkHeader.match(nextPattern)[0];
+          }
+        }
+        return data;
+
+      case "POST":
+        //const [fileName, processedContent] = createAdvisory(query.content)
+        const fileName = `Advisory_${query.pkg.replace("/", "-")}.md`;
+        const desc = `Advisory for ${query.pkg}`;
+
+        return await octokit.request("POST /gists", {
+          description: desc,
+          public: false,
+          files: {
+            [fileName]: {
+              content: query.content,
+            },
+          },
+          headers: {
+            "X-GitHub-Api-Version": "2022-11-28",
+          },
+        });
+    }
+  } catch (error) {
+    throw error;
+  }
 }
