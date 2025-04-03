@@ -1,0 +1,332 @@
+[
+    {
+        "sig": [
+            "IntcIl9fcHJvdG9fX1wiOntcInBvbGx1dGVkS2V5XCI6XCJwb2xsdXRlZFZhbHVlXCJ9fSI="
+        ]
+    },
+    {
+        "sig": [
+            "IntcIl9fcHJvdG9fX1wiOntcInBvbGx1dGVkS2V5XCI6XCJwb2xsdXRlZFZhbHVlXCJ9fSI=",
+            "{}"
+        ]
+    },
+    {
+        "sig": [
+            "{}",
+            "IntcIl9fcHJvdG9fX1wiOntcInBvbGx1dGVkS2V5XCI6XCJwb2xsdXRlZFZhbHVlXCJ9fSI="
+        ]
+    },
+    {
+        "sig": [
+            "IntcIl9fcHJvdG9fX1wiOntcInBvbGx1dGVkS2V5XCI6XCJwb2xsdXRlZFZhbHVlXCJ9fSI=",
+            "IntcIl9fcHJvdG9fX1wiOntcInBvbGx1dGVkS2V5XCI6XCJwb2xsdXRlZFZhbHVlXCJ9fSI="
+        ]
+    },
+    {
+        "sig": [
+            "{}",
+            "{}",
+            "IntcIl9fcHJvdG9fX1wiOntcInBvbGx1dGVkS2V5XCI6XCJwb2xsdXRlZFZhbHVlXCJ9fSI="
+        ]
+    },
+    {
+        "sig": [
+            "{}",
+            "{}",
+            "{}",
+            "IntcIl9fcHJvdG9fX1wiOntcInBvbGx1dGVkS2V5XCI6XCJwb2xsdXRlZFZhbHVlXCJ9fSI="
+        ]
+    },
+    {
+        "sig": [
+            "{}",
+            "__proto__.pollutedKey",
+            123
+        ]
+    },
+    {
+        "sig": [
+            "{}",
+            "__proto__[pollutedKey]",
+            123
+        ]
+    },
+    {
+        "sig": [
+            "__proto__.pollutedKey",
+            123
+        ]
+    },
+    {
+        "sig": [
+            "__proto__[pollutedKey]",
+            123
+        ]
+    },
+    {
+        "sig": [
+            "{}",
+            "__proto__",
+            "pollutedKey",
+            123
+        ]
+    },
+    {
+        "sig": [
+            "__proto__",
+            "pollutedKey",
+            123
+        ]
+    },
+    {
+        "sig": [
+            "{}",
+            "IntcIl9fcHJvdG9fX1wiOntcInBvbGx1dGVkS2V5XCI6XCJwb2xsdXRlZFZhbHVlXCJ9fSI=",
+            "{}"
+        ]
+    },
+    {
+        "sig": [
+            "{}",
+            "IntcIl9fcHJvdG9fX1wiOntcInBvbGx1dGVkS2V5XCI6XCJwb2xsdXRlZFZhbHVlXCJ9fSI=",
+            true
+        ]
+    },
+    {
+        "sig": [
+            true,
+            "{}",
+            "IntcIl9fcHJvdG9fX1wiOntcInBvbGx1dGVkS2V5XCI6XCJwb2xsdXRlZFZhbHVlXCJ9fSI="
+        ]
+    },
+    {
+        "sig": [
+            "{}",
+            true,
+            "IntcIl9fcHJvdG9fX1wiOntcInBvbGx1dGVkS2V5XCI6XCJwb2xsdXRlZFZhbHVlXCJ9fSI="
+        ]
+    },
+    {
+        "sig": [
+            true,
+            "{}",
+            "IntcImNvbnN0cnVjdG9yXCI6e1wicHJvdG90eXBlXCI6e1wicG9sbHV0ZWRLZXlcIjoxMjN9fX0i"
+        ]
+    },
+    {
+        "sig": [
+            "{}",
+            "IntcImNvbnN0cnVjdG9yXCI6e1wicHJvdG90eXBlXCI6e1wicG9sbHV0ZWRLZXlcIjoxMjN9fX0i"
+        ]
+    },
+    {
+        "sig": [
+            "IntcImNvbnN0cnVjdG9yXCI6e1wicHJvdG90eXBlXCI6e1wicG9sbHV0ZWRLZXlcIjoxMjN9fX0i"
+        ]
+    },
+    {
+        "sig": [
+            "[__proto__]\npollutedKey=123"
+        ]
+    },
+    {
+        "sig": [
+            "{}",
+            "constructor.prototype.pollutedKey",
+            "123"
+        ]
+    },
+    {
+        "sig": [
+            "__proto__.pollutedKey",
+            "{}",
+            "123"
+        ]
+    },
+    {
+        "sig": [
+            "this.constructor.prototype.pollutedKey",
+            "{}",
+            "123"
+        ]
+    },
+    {
+        "sig": [
+            "__proto__.pollutedKey",
+            "123",
+            "{}"
+        ]
+    },
+    {
+        "sig": [
+            "{}",
+            "/__proto__/pollutedKey",
+            "123"
+        ]
+    },
+    {
+        "sig": [
+            "{}",
+            "/__proto__/pollutedKey",
+            "123",
+            true
+        ]
+    },
+    {
+        "sig": [
+            "__proto__.pollutedKey=123"
+        ]
+    },
+    {
+        "sig": [
+            "__proto__:pollutedKey",
+            "123"
+        ]
+    },
+    {
+        "sig": [
+            "__proto__[pollutedKey]=123",
+            "{}"
+        ]
+    },
+    {
+        "sig": [
+            "{}",
+            "constructor/prototype/pollutedKey",
+            "123",
+            "/"
+        ]
+    },
+    {
+        "sig": [
+            "__proto__",
+            {
+                "pollutedKey": "123"
+            },
+            "{}",
+            true
+        ]
+    },
+    {
+        "sig": [
+            {
+                "__proto__.pollutedKey": "123"
+            }
+        ]
+    },
+    {
+        "sig": [
+            {
+                "constructor.prototype.pollutedKey": "123"
+            }
+        ]
+    },
+    {
+        "sig": [
+            "{}",
+            [
+                [
+                    "__proto__"
+                ],
+                "pollutedKey"
+            ],
+            "123"
+        ]
+    },
+    {
+        "sig": [
+            [
+                [
+                    "__proto__"
+                ],
+                "pollutedKey"
+            ],
+            "123",
+            "{}"
+        ]
+    },
+    {
+        "sig": [
+            "{}",
+            [
+                [
+                    "__proto__"
+                ],
+                "pollutedKey"
+            ],
+            "123",
+            true
+        ]
+    },
+    {
+        "sig": [
+            "{}",
+            [
+                "__proto__",
+                "pollutedKey"
+            ],
+            "123"
+        ]
+    },
+    {
+        "sig": [
+            "{}",
+            [
+                "constructor.prototype.pollutedKey"
+            ],
+            "123"
+        ]
+    },
+    {
+        "sig": [
+            [
+                "__proto__"
+            ],
+            "pollutedKey",
+            "123"
+        ]
+    },
+    {
+        "sig": [
+            [
+                "__proto__.pollutedKey"
+            ],
+            [
+                "123"
+            ]
+        ]
+    },
+    {
+        "sig": [
+            "{}",
+            [
+                [
+                    "__proto__"
+                ],
+                [
+                    "__proto__"
+                ],
+                "pollutedKey"
+            ],
+            "123"
+        ]
+    },
+    {
+        "sig": [
+            [
+                "-constructor.prototype.pollutedKey",
+                "123"
+            ]
+        ]
+    },
+    {
+        "sig": [
+            "./proto_file"
+        ]
+    },
+    {
+        "sig": [
+            "./constructer_file"
+        ]
+    }
+]
