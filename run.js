@@ -27,8 +27,7 @@ const argv = yargs
   .option("tool", {
     describe: "the path to the tool to run, use related path from the prject directory, e.g., fuzzproto.mjs",
     type: "string",
-    default: "fuzzproto.beta.mjs",
-    //default: "baselines/fuzzproto_fnEnum.mjs",
+    default: "bullseye.mjs",
   })
   .option("install", {
     describe: "install the package before run the tool",

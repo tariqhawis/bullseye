@@ -20,10 +20,15 @@ const argv = yargs
       "JSON file containing the list of packages (e.g., {package_name, version}) or a single package (e.g., package_name@version)",
     type: "string",
   })
+    .option("npmPath", {
+    describe:
+      "NPM package installation path, e.g., /home/benchmark",
+    type: "string",
+  })
   .option("tool", {
     describe: "the path to the tool to run, use related path from the prject directory, e.g., scripts/fuzzproto.mjs",
     type: "string",
-    default: "scripts/fuzzproto.mjs",
+    default: "scripts/bullseye.mjs",
   })
   .option("install", {
     describe: "install the package before run the tool, if not already installed",
@@ -83,8 +88,8 @@ const currentPath = process.cwd();
 const projDir = "/home/tariq/bullseye";
 let inputPath = null;
 
-const benchPath = "/home/benchmark/npm47k_Jul21";
-inputPath = "/home/tariq/bullseye/dataset/hd_pkgs.txt";
+const benchPath = argv.npmPath;// "/home/benchmark/npm47k_Jul21";
+//inputPath = "/home/tariq/bullseye/dataset/hd_pkgs.txt";
 
 const input = argv.input ? argv.input : inputPath !== null ? inputPath : null;
 
