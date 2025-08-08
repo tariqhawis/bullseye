@@ -367,7 +367,7 @@ function findTestFiles(pkgPath, pakgName = null, fn = null) {
       .replace(/^(\d)/, "a$1")
       .replace(/^@/, "")
       .replace(/[:\-\./]/g, "_"),
-    testParentDir = `${pkgPath}/{node_modules/${pakgName},repo-${pkgDir}}`;
+    testParentDir = `${pkgPath}/{node_modules/${pakgName},repo-${pkgDir},"package"}`;
   // if fn is defined, use the function path as test file path (e.g.,locutus.c.math.abs: locutus/c/math/abs.test.js)
   // pluse, consider having test word in any format in the test file name (e.g., abs.test.js, abs.spec.js, abs.index.js, test-abs.js)
   try {

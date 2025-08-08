@@ -32,9 +32,9 @@ const argv = yargs
     default: false,
   })
   .option("vm", {
-    describe: "run entry points within node.js VM",
+    describe: "run the tool in a docker container",
     type: "boolean",
-    default: true,
+    default: false,
   })
   .option("sandbox", {
     describe: "run the tool in a docker container",
@@ -46,15 +46,15 @@ const argv = yargs
     type: "string",
     default: "stdout",
   })
+  .option("refineInput", {
+    describe: "the input file to be refined, default is the temp file",
+    type: "string",
+    default: null,
+  })
   .option("parallel", {
     describe: "number of concurrent packages to process",
     type: "number",
     default: 1,
-  })
-  .option("cveCheck", {
-    describe: "check for matched CVEs",
-    type: "Boolean",
-    default: false,
   })
   .option("timeout", {
     describe: "timeout for the tool",
@@ -114,13 +114,10 @@ let inputPath = null;
 // inputPath = "/home/tariq/bulleyes2/dataset/pkgs170.json";
 // inputPath = "/home/tariq/bulleyes2/dataset/zd291Latest.txt";
 // inputPath = "/home/tariq/bulleyes2/dataset/npm34.json";
-const benchPath = "/home/benchmark/npm47k";
-// const benchPath = "/home/benchmark/npm5k";
-// const benchPath = "/home/benchmark/npm5k_Jul21";
+// const benchPath = "/home/benchmark/npm47k";
+const benchPath = "/home/benchmark/npm5k";
 // inputPath = "/home/tariq/bulleyes2/dataset/myp44649+34.json";
-inputPath = "/home/tariq/bulleyes2/dataset/hd_pkgs.txt";
-// inputPath = "/home/tariq/bulleyes2/dataset/ld_pkgs.txt";
-// inputPath = "/home/tariq/bulleyes2/dataset/npm6588.json";
+inputPath = "/home/tariq/bulleyes2/dataset/npm6588.json";
 //const benchPath = "/data/benchmark/benchmark-zhou-291";
 //const benchPath = "/home/tariq/benchmark/benchmark-fuzzproto";
 // const benchPath = "/home/tariq/benchmark/ai";
@@ -163,17 +160,12 @@ else {
   // process.exit();
   dataset = [
     {
-      // package_name: "fun-map",
-      // version: "3.3.1",
-      // pkgPath: "/data/benchmark/odgen19/fun_map-3.3.1",
+      package_name: "fun-map",
+      version: "3.3.1",
+      pkgPath: "/data/benchmark/odgen19/fun_map-3.3.1",
       // package_name: "lodash@4.17.4",
       // version: "4.17.4",
       // pkgPath: "/home/tariq/benchmark/arteau-15/lodash-4.17.4",
-      // package_name: "@theintern/common",
-      // version: "0.3.0",
-      package_name: "node-forge",
-      version: "0.9.0",
-      // pkgPath: "/data/benchmark/ss-100/defaults_deep-0.2.4",
     },
   ];
 }
@@ -187,7 +179,7 @@ const suffix = `${input ? input.replace(/.*\/([^\/]+)$/, "$1") : "default"}.${lo
 // const dirPath = "benchmark/myZD";
 // const dirPath = "benchmark/manar";
 // const dirPath = "benchmark/random";
-const dirPath = "benchmark/bulleyes/original";
+const dirPath = "benchmark/bulleyes";
 const outputFile = `${projDir}/${dirPath}/${argv.tool.replace(/.*\/([^\/]+)$/, "$1")}.${suffix}.json`;
 // const outputFile = "/home/tariq/bulleyes2/benchmark/myZD/exploits95_notExcel.json";
 const tempFile = `${projDir}/${dirPath}/${argv.tool.replace(/.*\/([^\/]+)$/, "$1")}.${suffix}.txt`;
@@ -226,172 +218,166 @@ async function processQueue(file) {
 (async () => {
   let counter = 0;
   let pkgList = [];
-  const tasks = dataset.map((pkg) =>
-    limit(async () => {
-      counter++;
-      // Extract package name and version based on the structure of pkg
-      let pkgName, version;
-      if (typeof pkg === "object") {
-        if (pkg.hasOwnProperty("libDir")) {
-          [, pkgName, version] = pkg.libDir.match(/^(@?[^@]+)@?(.*)/);
-        } else if (pkg.hasOwnProperty("package")) {
-          [, pkgName, version] = pkg.package.match(/^(@?[^@]+)@?(.*)/);
-        } else {
-          pkgName = pkg.package_name;
-          version = pkg.version;
-        }
-      } else if (typeof pkg === "string") {
-        [, pkgName, version] = pkg.split(",")[0].match(/^(@?[^@]+)@?(.*)/);
-      }
-      //if (argv.latest) {
-      const response = await fetch(`https://registry.npmjs.org/${pkgName}`);
-      pkgMeta = await response.json();
-      version = pkgMeta.versions[pkgMeta["dist-tags"].latest].version;
-      //}
-      const pkgLib =
-        pkgName
-          .replace(/^(\d)/, "a$1")
-          .replace(/^@/, "")
-          .replace(/[:\-\./]/g, "_") +
-        "-" +
-        version;
-      const fullPath = `${benchPath}/${pkgLib}`;
-      //const pkgPathPattern = `${benchPath}/${pkgLib}/${pkgLib}`; // odgen pattern
-      const pkgFolder = glob.sync(fullPath);
-      const repoFolderName = [
-        pkgName
-          .replace(/^(\d)/, "a$1")
-          .replace(/^@/, "")
-          .replace(/[:\-\./]/g, "_"),
-        pkgName,
-      ];
-      const pkgPath = pkg.pkgPath ? pkg.pkgPath : fullPath;
-      pkgObj = {
-        package_name: pkgName,
-        version: version,
-        pkgPath: argv.sandbox ? pkgPath.replace(benchPath, "/usr/src/dataset") : pkgPath,
-        options: {
-          verbose: pkg?.options?.verbose ?? false,
-          sandbox: pkg?.options?.sandbox ?? true,
-          vm: pkg?.options?.vm ?? true,
-          fixFuzz: pkg?.options?.fixFuzz ?? true,
-          maxTestFiles: pkg?.options?.maxTestFiles ?? 1500,
-          multiVectors: pkg?.options?.multiVectors ?? true,
-          unknownSideEffect: false,
-        },
-      };
-      // let repoDir =
-      //   glob.sync(`${fullPath}/repo-${repoFolderName[0]}`).length > 0 ? `${fullPath}/repo-${repoFolderName[0]}` : null;
-      // if (argv.install) {
-      //   if (!fs.existsSync(fullPath)) {
-      //     fs.mkdirSync(fullPath, { recursive: true });
-      //     console.info(`Created: ${fullPath}`);
-      //   } else {
-      //     if (!fs.existsSync(`${fullPath}/node_modules`) || fs.readdirSync(`${fullPath}/node_modules`).length === 0) {
-      //       // console.warning("Folder not found, installing on the current folder..");
-      //       //fs.appendFileSync(outputFile, pkg.package_name + logText + ",\n");
-      //       process.chdir(fullPath);
-      //       try {
-      //         // some packages like @abip/sp-common cannot installed properly with --legacy-peer-deps
-      //         execSync(
-      //           `npm init -y && npm install ${pkgName}@${version} && npm install ${pkgName}@${version} --legacy-peer-deps`,
-      //           {
-      //             stdio: "pipe",
-      //             encoding: "utf-8",
-      //           }
-      //         );
+  // const tasks = dataset.map((pkg) =>
+  //   limit(async () => {
+  //     counter++;
+  //     // Extract package name and version based on the structure of pkg
+  //     let pkgName, version;
+  //     if (typeof pkg === "object") {
+  //       if (pkg.hasOwnProperty("libDir")) {
+  //         [, pkgName, version] = pkg.libDir.match(/^(@?[^@]+)@?(.*)/);
+  //       } else if (pkg.hasOwnProperty("package")) {
+  //         [, pkgName, version] = pkg.package.match(/^(@?[^@]+)@?(.*)/);
+  //       } else {
+  //         pkgName = pkg.package_name;
+  //         version = pkg.version;
+  //       }
+  //     } else if (typeof pkg === "string") {
+  //       [, pkgName, version] = pkg.split(",")[0].match(/^(@?[^@]+)@?(.*)/);
+  //     }
 
-      //         // execSync(`npm init -y && npm install ${pkgName}@${version} --legacy-peer-deps`, {
-      //         //   stdio: "pipe",
-      //         //   encoding: "utf-8",
-      //         // });
-      //       } catch (error) {}
-      //       //process.chdir(currentPath);
-      //       //pkgObj.pkgPath = path.resolve(`./`);
-      //       // Fetch metadata
-      //     }
-      //     try {
-      //       if (!repoDir || (fs.existsSync(repoDir) && fs.readdirSync(repoDir).length === 0)) {
-      //         repoDir = await fetchMetadata(pkgObj, fullPath); // pkg: { package_name, version, pkgLink, pkgPath }
-      //         console.log(`Fetched metadata for ${pkgName}`);
-      //       }
-      //     } catch (error) {
-      //       console.error(`Failed to fetch metadata for ${pkgName}: ${error.message}`);
-      //       fs.appendFileSync(
-      //         path.resolve(`${currentPath}/../logs/createBenchmarkDir.log`),
-      //         pkgName + ": " + error.message + "\n"
-      //       );
-      //     }
-      //   }
-      // }
-      // start exploiting the packages
-      try {
-        // for the first object, write the opening bracket
+  //     const pkgLib =
+  //       pkgName
+  //         .replace(/^(\d)/, "a$1")
+  //         .replace(/^@/, "")
+  //         .replace(/[:\-\./]/g, "_") +
+  //       "-" +
+  //       version;
+  //     const fullPath = `${benchPath}/${pkgLib}`;
+  //     //const pkgPathPattern = `${benchPath}/${pkgLib}/${pkgLib}`; // odgen pattern
+  //     const pkgFolder = glob.sync(fullPath);
+  //     const repoFolderName = [
+  //       pkgName
+  //         .replace(/^(\d)/, "a$1")
+  //         .replace(/^@/, "")
+  //         .replace(/[:\-\./]/g, "_"),
+  //       pkgName,
+  //     ];
+  //     const pkgPath = pkg.pkgPath ? pkg.pkgPath : fullPath;
+  //     pkgObj = {
+  //       package_name: pkgName,
+  //       version: version,
+  //       pkgPath: argv.sandbox ? pkgPath.replace(benchPath, "/usr/src/dataset") : pkgPath,
+  //       options: {
+  //         verbose: pkg?.options?.verbose ?? false,
+  //         sandbox: pkg?.options?.sandbox ?? true,
+  //         vm: pkg?.options?.vm ?? true,
+  //         fixFuzz: pkg?.options?.fixFuzz ?? true,
+  //         maxTestFiles: pkg?.options?.maxTestFiles ?? 1500,
+  //         multiVectors: pkg?.options?.multiVectors ?? true,
+  //         unknownSideEffect: false,
+  //       },
+  //     };
+  //     let repoDir =
+  //       glob.sync(`${fullPath}/repo-${repoFolderName[0]}`).length > 0 ? `${fullPath}/repo-${repoFolderName[0]}` : null;
+  //     if (argv.install) {
+  //       if (!fs.existsSync(fullPath)) {
+  //         fs.mkdirSync(fullPath, { recursive: true });
+  //         console.info(`Created: ${fullPath}`);
+  //       } else {
+  //         if (!fs.existsSync(`${fullPath}/node_modules`) || fs.readdirSync(`${fullPath}/node_modules`).length === 0) {
+  //           // console.warning("Folder not found, installing on the current folder..");
+  //           //fs.appendFileSync(outputFile, pkg.package_name + logText + ",\n");
+  //           process.chdir(fullPath);
+  //           try {
+  //             // some packages like @abip/sp-common cannot installed properly with --legacy-peer-deps
+  //             execSync(
+  //               `npm init -y && npm install ${pkgName}@${version} && npm install ${pkgName}@${version} --legacy-peer-deps`,
+  //               {
+  //                 stdio: "pipe",
+  //                 encoding: "utf-8",
+  //               }
+  //             );
 
-        //results = await exploitPkg(pkgObj);
-        //results = await
-        //if (!argv.install) {
-        const { toolOutput, stats, duration } = await sandboxRun(pkgObj, pkgLib, argv.timeout);
-        //}
-        //pkgList.push({ package_name: pkgName, version: version });
-        //if (results && results.length > 0) {
-        // if (argv.output === "stdout") console.log(JSON.stringify({ package_name: pkgName, version: version, results }));
-        // else {
-        //   if (counter === 0) fs.writeFileSync(outputFile, "[", "utf-8");
-        //   // Append the result to the JSON file after processing each package
-        //   // fs.appendFileSync(
-        //   //   outputFile,
-        //   //   JSON.stringify({ package_name: pkgName, version: version, result }) + ",\n",
-        //   //   "utf8"
-        //   // );
-        //   // avoid the last comma
-        //   else if (counter === dataset.length - 1)
-        //     fs.appendFileSync(
-        //       outputFile,
-        //       JSON.stringify({ package_name: pkgName, version: version, results: results }) + "]",
-        //       "utf-8"
-        //     );
-        //   // append the results, one by one, to the file, separated by a newline and a comma, so that it can be read as an array of objects, until reaching the end of the loop "the last object should not have a comma"
-        //   else
-        //     fs.appendFileSync(
-        //       outputFile,
-        //       JSON.stringify({ package_name: pkgName, version: version, results: results }) + ",\n",
-        //       "utf8"
-        //     );
-        // }
-        //} // if results
-        return {
-          package: pkg,
-          duration,
-          fnCount: stats.fnCount,
-          modulePaths: stats.modulePaths,
-          results: toolOutput,
-        };
-      } catch (err) {
-        console.error(`Error processing ${pkg}:`, err);
-      }
-    })
-  );
-  const allResults = await Promise.all(tasks);
+  //             // execSync(`npm init -y && npm install ${pkgName}@${version} --legacy-peer-deps`, {
+  //             //   stdio: "pipe",
+  //             //   encoding: "utf-8",
+  //             // });
+  //           } catch (error) {}
+  //           //process.chdir(currentPath);
+  //           //pkgObj.pkgPath = path.resolve(`./`);
+  //           // Fetch metadata
+  //         }
+  //         try {
+  //           if (!repoDir || (fs.existsSync(repoDir) && fs.readdirSync(repoDir).length === 0)) {
+  //             repoDir = await fetchMetadata(pkgObj, fullPath); // pkg: { package_name, version, pkgLink, pkgPath }
+  //             console.log(`Fetched metadata for ${pkgName}`);
+  //           }
+  //         } catch (error) {
+  //           console.error(`Failed to fetch metadata for ${pkgName}: ${error.message}`);
+  //           fs.appendFileSync(
+  //             path.resolve(`${currentPath}/../logs/createBenchmarkDir.log`),
+  //             pkgName + ": " + error.message + "\n"
+  //           );
+  //         }
+  //       }
+  //     }
+  //     // start exploiting the packages
+  //     try {
+  //       // for the first object, write the opening bracket
+
+  //       //results = await exploitPkg(pkgObj);
+  //       //results = await
+  //       //if (!argv.install) {
+  //       //const { toolOutput, duration } = await sandboxRun(pkgObj, pkgLib, argv.timeout);
+  //       //}
+  //       //pkgList.push({ package_name: pkgName, version: version });
+  //       //if (results && results.length > 0) {
+  //       // if (argv.output === "stdout") console.log(JSON.stringify({ package_name: pkgName, version: version, results }));
+  //       // else {
+  //       //   if (counter === 0) fs.writeFileSync(outputFile, "[", "utf-8");
+  //       //   // Append the result to the JSON file after processing each package
+  //       //   // fs.appendFileSync(
+  //       //   //   outputFile,
+  //       //   //   JSON.stringify({ package_name: pkgName, version: version, result }) + ",\n",
+  //       //   //   "utf8"
+  //       //   // );
+  //       //   // avoid the last comma
+  //       //   else if (counter === dataset.length - 1)
+  //       //     fs.appendFileSync(
+  //       //       outputFile,
+  //       //       JSON.stringify({ package_name: pkgName, version: version, results: results }) + "]",
+  //       //       "utf-8"
+  //       //     );
+  //       //   // append the results, one by one, to the file, separated by a newline and a comma, so that it can be read as an array of objects, until reaching the end of the loop "the last object should not have a comma"
+  //       //   else
+  //       //     fs.appendFileSync(
+  //       //       outputFile,
+  //       //       JSON.stringify({ package_name: pkgName, version: version, results: results }) + ",\n",
+  //       //       "utf8"
+  //       //     );
+  //       // }
+  //       //} // if results
+  //       // return {
+  //       //   package: pkg,
+  //       //   duration,
+  //       //   results: toolOutput,
+  //       // };
+  //     } catch (err) {
+  //       console.error(`Error processing ${pkg}:`, err);
+  //     }
+  //   })
+  // );
+  //const allResults = await Promise.all(tasks);
   //read tempFile, fix [] (add [ at the beginning of the file, and replace , with ] at the end), refine the results, and write to outputFile
   try {
-    // if (fs.existsSync(tempFile) && argv.cveCheck) {
-    //   const tempData = fs.readFileSync(tempFile, { encoding: "utf8" });
-    //   const tempResults = JSON.parse(tempData.replace(/,\n$/, "]").replace(/^\{/, "[{\n")).filter(Boolean);
-    //   const refinedRes = await refineReport(tempResults);
-    //   fs.writeFileSync(outputFile, JSON.stringify(refinedRes), "utf8");
-    // }
-    fs.writeFileSync(outputFile, JSON.stringify(allResults), "utf8");
+    let refineInput = argv.refineInput ? argv.refineInput : tempFile;
+    if (fs.existsSync(refineInput)) {
+      const tempData = fs.readFileSync(refineInput, { encoding: "utf8" });
+      const tempResults = JSON.parse(tempData.replace(/,\n$/, "]").replace(/^\{/, "[{\n")).filter(Boolean);
+      const refinedRes = await refineReport(tempResults);
+      fs.writeFileSync(`${refineInput}_refined.json`, JSON.stringify(refinedRes), "utf8");
+    } //else fs.writeFileSync(outputFile, JSON.stringify(allResults), "utf8");
   } catch (error) {
     console.log(error);
   }
-  console.log("All packages processed!");
+  //console.log("All packages processed!");
   //results=Object.values(pkgList.reduce((acc, obj) => {const key = `${obj.results.entryPoint}-${obj.results.sinkLocation?.setProp || "null"}`;  if (!acc[key]) acc[key] = obj; return acc;}, {}));
 
   // var lib = await import("/home/tariq/bulleyes/p-limit/index.js"); // Install via npm if needed
   // const pLimit = lib.default;
   // const limit = pLimit(5); // Adjust concurrency level
-  process.chdir(currentPath);
+  //process.chdir(currentPath);
   // for (let pkg of dataset) {
   //   //const promises = dataset.map((pkg) => {
   //   //});
@@ -415,7 +401,6 @@ async function processQueue(file) {
 async function sandboxRun(pkg, pkgLib, timeout = 120000) {
   let toolOutput = [];
   let duration = 0;
-  let stats = {};
   const docker = new Docker();
   const CONTAINER_TIMEOUT = timeout;
   const CHECK_INTERVAL = 5000; // 5 seconds
@@ -464,7 +449,7 @@ async function sandboxRun(pkg, pkgLib, timeout = 120000) {
       const elapsedTime = Date.now() - startTime;
       if (elapsedTime > CONTAINER_TIMEOUT) {
         console.error(`Timeout reached. Stopping container: ${container.id}`);
-        //safeWrite(JSON.stringify({ package: `${pkg.package_name}@${pkg.version}`, fnCount: parsed.fnCount, results: parsed.results }));
+        safeWrite(JSON.stringify(`{"package": ${pkg.package_name}@${pkg.version}}`), logFile);
         clearInterval(interval);
         try {
           await container.stop();
@@ -507,14 +492,6 @@ async function sandboxRun(pkg, pkgLib, timeout = 120000) {
           // );
           safeWrite(JSON.stringify({ package: `${pkg.package_name}@${pkg.version}`, results: parsed }));
           //console.log(JSON.parse(chunk.match(/<DETECTION>(.*)<\/DETECTION>/)[1]));
-        } else if (chunk.search(/<STATS>(.*)<\/STATS>/) > -1) {
-          stats = JSON.parse(chunk.trim().match(/<STATS>(.*)<\/STATS>/)[1]);
-          // toolOutput.push(parsed);
-          // fs.appendFileSync(
-          //   tempFile,
-          //   JSON.stringify({ package: `${pkg.package_name}@${pkg.version}`, results: parsed }) + ",\n",
-          //   "utf8"
-          // );
         } else {
           buffer += chunk; // Append incoming data
 
@@ -526,13 +503,7 @@ async function sandboxRun(pkg, pkgLib, timeout = 120000) {
               console.log("Detection Found");
 
               // Save result
-              safeWrite(
-                JSON.stringify({
-                  package: `${pkg.package_name}@${pkg.version}`,
-                  fnCount: parsed.fnCount,
-                  results: parsed.results,
-                })
-              );
+              safeWrite(JSON.stringify({ package: `${pkg.package_name}@${pkg.version}`, results: parsed }));
 
               // Remove processed data from buffer
               buffer = buffer.replace(match[0], "");
@@ -580,7 +551,7 @@ async function sandboxRun(pkg, pkgLib, timeout = 120000) {
     }
     // return toolOutput;
   }
-  return { toolOutput, stats, duration };
+  return { toolOutput, duration };
 }
 
 async function fetchMetadata(pkgData, pkgPath) {

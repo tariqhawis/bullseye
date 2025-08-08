@@ -247,7 +247,7 @@ async function githubRequest1(query, method = "GET", API = "token ghp_oDZnjOh1ww
   }
 }
 
-async function githubRequest(query, method = "GET", API) {
+async function githubRequest(query, method = "GET", API = "token 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") {
   const { Octokit } = await import("octokit");
   //const octokit = new Octokit({});
   const octokit = new Octokit({

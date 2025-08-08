@@ -4,8 +4,8 @@ const nodemailer = require("nodemailer");
 const path = require("path");
 
 // Path to the OAuth 2.0 credentials JSON file
-const CREDENTIALS_PATH = path.join(__dirname, "..", ".creds.json");
-const TOKEN_PATH = path.join(__dirname, "..", "token.json");
+const CREDENTIALS_PATH = path.join(__dirname, ".creds.json");
+const TOKEN_PATH = path.join(__dirname, "token.json");
 
 // Define the necessary scopes
 const SCOPES = ["https://www.googleapis.com/auth/gmail.compose"];

@@ -3,6 +3,8 @@ import vm from "vm";
 import fs from "fs";
 import path from "path";
 import { glob } from "glob";
+import { pathToFileURL } from "url";
+import { createRequire } from "module";
 var BAD_JSON = {};
 var fnList = [];
 var resultsBuffer = [];
@@ -10,7 +12,7 @@ var parsedObject = [];
 var victim = {};
 var someObj = {};
 
-const projPath = "/home/tariq/bulleyes"; // host path
+const projPath = "/home/tariq/bulleyes2"; // host path
 // const projPath = "/usr/src/app"; // docker path
 const fixedCases = JSON.parse(fs.readFileSync(`${projPath}/fuzzPaterns.json`, "utf-8"));
 let pkg = {};
@@ -21,12 +23,21 @@ if (process.argv[2]) {
   pkg = JSON.parse(process.argv[2]);
 } else {
   pkg = {
-    // package_name: "assign-deep",
-    // version: "0.4.6",
-    // pkgPath: "/home/tariq/benchmark/arteau-15/assign_deep-0.4.6",
-    package_name: "lodash",
-    version: "4.17.4",
-    pkgPath: "/home/tariq/benchmark/arteau-15/lodash-4.17.4",
+    package_name: "assign-deep", // import issue
+    version: "1.0.0",
+    pkgPath: "/data/benchmark/ss-100/assign_deep-1.0.0",
+    // package_name: "mout", // timeout issue
+    // version: "2.0.0-alpha.1",
+    // pkgPath: "/data/benchmark/ss-100/mout-2.0.0-alpha.1",
+    // package_name: "node-forge",
+    // version: "0.9.0",
+    // pkgPath: "/data/benchmark/ss-100/node_forge-0.9.0",
+    // package_name: "@rpldy/uploader",
+    // version: "1.8.1",
+    // pkgPath: "/home/benchmark/npm47k/rpldy_uploader-1.8.1",
+    // package_name: "@tensorflow/tfjs",
+    // version: "4.22.0",
+    // pkgPath: "/home/tariq/benchmark/random/tensorflow_tfjs-4.22.0",
     options: {
       verbose: true,
       sandbox: false,
@@ -90,13 +101,16 @@ let pkgTimestamp = Date.now();
                     loc = JSON.parse(fs.readFileSync('./cloc.txt', { encoding: 'utf8' })).SUM['code']; */
     //    [importedPkg, importType] = await importModule2(pkgName);
     //importedPkg = await importModule(`${pkg.pkgPath}/node_modules/${pkg.package_name}`);
-    importedPkg = await loadPackage2(`${pkgPath}/node_modules/${pkg.package_name}`);
+    const results = await loadPackage(`${pkgPath}/node_modules/${pkg.package_name}`);
+    importedPkg = results.importedPkg;
+    detectionArray.modulePaths = results.modulePaths.length;
     //importedPkg = await import(`${pkg.pkgPath}/node_modules/${pkg.package_name}/index.js`);
     // importedPkg2 = await importGlobalNameSpace(`${pkg.pkgPath}/node_modules/${pkg.package_name}`);
     //let path = importType === "require" ? pkgName : importType === "import" ? `${pkgName}.default` : null;
     //fnList = fnEnumSimple(importedPkg, path, depth); // generate fnList
     //fnList = fnEnumerate(importedPkg, path, depth); // generate fnList
     fnList = fnEnumerate2(importedPkg, "pkgMainFunc", 5);
+    detectionArray.fnCount = fnList.length;
     // if (importedPkg2 && Object.keys(importedPkg2).length !== 0)
     //   fnList = fnList.concat(fnEnumerate(importedPkg2, "mainEntry", 5));
     //repoDir = await fetchMetadata(pkg);
@@ -135,7 +149,7 @@ let pkgTimestamp = Date.now();
         if (pkg.options.fixFuzz)
           fnLoop: for (const funcPath of fnList) {
             //const fn = funcPath.replace(/\.cjs|\.esm/, "");
-            const fn = funcPath.replace(/\.\_m\_[^\_]+\_m\_/, "");
+            const fn = funcPath.replace(/\.\_m\_[^\_]+\_m\_/, "").replace(".prototype.constructor", "");
             try {
               fixedCases.forEach((exploitArgs) => {
                 cleanUpProto(newObjectProto);
@@ -203,7 +217,8 @@ let pkgTimestamp = Date.now();
 
         fnLoop: for (const fnObj of fnList) {
           //const fn = fnObj.replace(/\.cjs|\.esm/, "");
-          const fn = fnObj.replace(/\.\_m\_[^\_]+\_m\_/, "");
+          //const fn = fnObj.replace(/\.\_m\_[^\_]+\_m\_/, "");
+          const fn = fnObj.replace(/\.\_m\_[^\_]+\_m\_/, "").replace(".prototype.constructor", "");
           try {
             for (const [testFile, inputList] of testCasesMap) {
               const locatedFnOI = findCallOfInterest(inputList[2], inputList[1], pkgName, fn);
@@ -213,80 +228,83 @@ let pkgTimestamp = Date.now();
               if (locatedFnOI.has(fn)) {
                 console.info(`Processing function: ${fn}`);
                 const exploitCases = generateExploits(locatedFnOI.get(fn));
+                const exploitInputs = Array.from(
+                  new Set(exploitCases.flatMap((inner) => inner.map(JSON.stringify)))
+                ).map(JSON.parse);
                 if (exploitCases.length > 0) {
-                  for (let exploitInputs of exploitCases) {
-                    for (let exploitArgs of exploitInputs) {
-                      //console.info(exploitArgs);
-                      //console.info(`Executing function: ${fn} with inputs: ${exploitArgs}`);
-                      // check of exploitArgs is identically equal to: exploitArgs===['e30=', 'IntcIl9fcHJvdG9fX1wiOntcInBvbGx1dGVkS2V5XCI6XCJwb2xsdXRlZFZhbHVlXCJ9fSI=']
-                      // if (exploitArgs.length === 2 && exploitArgs[0] === 'e30=' && exploitArgs[1] === 'IntcIl9fcHJvdG9fX1wiOntcInBvbGx1dGVkS2V5XCI6XCJwb2xsdXRlZFZhbHVlXCJ9fSI=')
-                      cleanUpProto(newObjectProto);
-                      const exeOutput = fnExecute(
-                        fnObj,
-                        importedPkg,
-                        exploitArgs,
-                        { cleanUpProto, copyPrototypeChain, decodeStr, verify },
-                        vmExec
-                      );
-                      //exeOutput = await forkExe(packagePath, fn, exploitArgs);
-                      /*                                                     exeOutput = spawnSync('node',
+                  //for (let exploitInputs of exploitCases) {
+                  for (let exploitArgs of exploitInputs) {
+                    //console.info(exploitArgs);
+                    //console.info(`Executing function: ${fn} with inputs: ${exploitArgs}`);
+                    // check of exploitArgs is identically equal to: exploitArgs===['e30=', 'IntcIl9fcHJvdG9fX1wiOntcInBvbGx1dGVkS2V5XCI6XCJwb2xsdXRlZFZhbHVlXCJ9fSI=']
+                    // if (exploitArgs.length === 2 && exploitArgs[0] === 'e30=' && exploitArgs[1] === 'IntcIl9fcHJvdG9fX1wiOntcInBvbGx1dGVkS2V5XCI6XCJwb2xsdXRlZFZhbHVlXCJ9fSI=')
+                    cleanUpProto(newObjectProto);
+                    const exeOutput = fnExecute(
+                      fnObj,
+                      importedPkg,
+                      exploitArgs,
+                      { cleanUpProto, copyPrototypeChain, decodeStr, verify },
+                      vmExec
+                    );
+                    //exeOutput = await forkExe(packagePath, fn, exploitArgs);
+                    /*                                                     exeOutput = spawnSync('node',
                              ['../${projPath}/fuzzUtils/execFn.js', fn, packagePath, JSON.stringify(exploitArgs)],
                                 { encoding: 'utf8', stdio: 'inherit' }); */
-                      if (nameSpaceObj && nameSpaceObj.length > 0)
-                        exeOutput = fnExecute(fn, nameSpaceObj, exploitArgs, globalObj, vmExec);
-                      // restore the original prototype chain
-                      cleanUpProto(newObjectProto);
-                      if (exeOutput?.polluted) {
-                        fnMap.set(pkgName, fn);
-                        // const sink = new Map(
-                        //   Array.from(exeOutput.sink).map(([key, value]) => {
-                        //     return [
-                        //       key,
-                        //       value ? value.replace(`${pkg.pkgPath}/`, "").replace(`${funcPath}/`, "") : null,
-                        //     ];
-                        //   })
-                        // );
-                        const sink = Object.values(exeOutput.sink).join("") === "" ? "null" : exeOutput.sink;
-                        const sinkV =
-                          Object.values(exeOutput.sink).join("") === ""
-                            ? "null"
-                            : Object.values(exeOutput.sink).join(",");
-                        const detection = {
-                          entryPoint: fnObj,
-                          inputCase: exeOutput.args,
-                          sinkLocation: sink ?? null,
-                          polluted: exeOutput?.polluted,
-                          mode: "pairwise",
-                          testFile: testFile.replace(`${pkgPath}/node_modules/${pkg.package_name}`, ""),
-                        };
-                        const input = JSON.stringify(exeOutput.args);
-                        const exploit = `${fn}#${input}`;
-                        // add a map to store the detected sink locations, with the entry point as the key
-                        //vectorMap.set(funcPath, exeOutput.sink);
-                        if (pkg.options.multiVectors) {
-                          vectorMap.set(fn, sinkV);
-                          detectedSink.add(sinkV);
-                          detectionArray.push(detection);
-                          //} else if (!detectedSink.has(sink)) {
-                          if (verbose) console.log(`${fn}(${input}) -> ${JSON.stringify(sinkV)}`);
-                          if (sandbox) console.log(`<DETECTION>${JSON.stringify(detection)}</DETECTION>`);
-                        } else if (vectorMap.get(fn) !== sinkV) {
-                          vectorMap.set(fn, sinkV);
-                          detectedSink.add(sinkV);
-                          detectionArray.push(detection);
-                          if (verbose) console.log(`${fn}(${input}) -> ${JSON.stringify(sinkV)}`);
-                          if (sandbox) console.log(`<DETECTION>${JSON.stringify(detection)}</DETECTION>`);
-                        }
-                        //if (exeOutput.sink && (exeOutput.sink.setProp || exeOutput.sink.setProto))
-                        //  detectedSink.add(`${exeOutput.sink.setProto}-${exeOutput.sink.setProp}`);
-                        //       vectorMap.set(exploit, exeOutput.sink || null);
-                        // if (verbose) console.info(`${fn}(${input}) -> ${JSON.stringify(sinkV)}`);
-                        // if (sandbox) console.info(`<DETECTION>${JSON.stringify(detection)}</DETECTION>`);
-
-                        //continue fnLoop;
+                    if (nameSpaceObj && nameSpaceObj.length > 0)
+                      exeOutput = fnExecute(fn, nameSpaceObj, exploitArgs, globalObj, vmExec);
+                    // restore the original prototype chain
+                    cleanUpProto(newObjectProto);
+                    if (exeOutput?.polluted) {
+                      fnMap.set(pkgName, fn);
+                      // const sink = new Map(
+                      //   Array.from(exeOutput.sink).map(([key, value]) => {
+                      //     return [
+                      //       key,
+                      //       value ? value.replace(`${pkg.pkgPath}/`, "").replace(`${funcPath}/`, "") : null,
+                      //     ];
+                      //   })
+                      // );
+                      const sink = Object.values(exeOutput.sink).join("") === "" ? "null" : exeOutput.sink;
+                      const sinkV =
+                        Object.values(exeOutput.sink).join("") === ""
+                          ? "null"
+                          : Object.values(exeOutput.sink).join(",");
+                      const detection = {
+                        entryPoint: fnObj,
+                        inputCase: exeOutput.args,
+                        sinkLocation: sink ?? null,
+                        polluted: exeOutput?.polluted,
+                        mode: "pairwise",
+                        testFile: testFile.replace(`${pkgPath}/node_modules/${pkg.package_name}`, ""),
+                      };
+                      const input = JSON.stringify(exeOutput.args);
+                      const exploit = `${fn}#${input}`;
+                      // add a map to store the detected sink locations, with the entry point as the key
+                      //vectorMap.set(funcPath, exeOutput.sink);
+                      if (pkg.options.multiVectors) {
+                        vectorMap.set(fn, sinkV);
+                        detectedSink.add(sinkV);
+                        detectionArray.push(detection);
+                        //} else if (!detectedSink.has(sink)) {
+                        if (verbose) console.log(`${fn}(${input}) -> ${JSON.stringify(sinkV)}`);
+                        if (sandbox) console.log(`<DETECTION>${JSON.stringify(detection)}</DETECTION>`);
+                      } else if (vectorMap.get(fn) !== sinkV) {
+                        vectorMap.set(fn, sinkV);
+                        detectedSink.add(sinkV);
+                        detectionArray.push(detection);
+                        if (verbose) console.log(`${fn}(${input}) -> ${JSON.stringify(sinkV)}`);
+                        if (sandbox) console.log(`<DETECTION>${JSON.stringify(detection)}</DETECTION>`);
                       }
+                      //if (exeOutput.sink && (exeOutput.sink.setProp || exeOutput.sink.setProto))
+                      //  detectedSink.add(`${exeOutput.sink.setProto}-${exeOutput.sink.setProp}`);
+                      //       vectorMap.set(exploit, exeOutput.sink || null);
+                      // if (verbose) console.info(`${fn}(${input}) -> ${JSON.stringify(sinkV)}`);
+                      // if (sandbox) console.info(`<DETECTION>${JSON.stringify(detection)}</DETECTION>`);
+
+                      //continue fnLoop;
                     }
                   }
+                  //}
                 }
               }
             }
@@ -322,6 +340,8 @@ let pkgTimestamp = Date.now();
     //const testFiles = findTestFiles(pkgName, repo, argv[3])
     //if (verbose) console.info(JSON.stringify(results, null, 2));
     if (!sandbox) console.log(`<JSON-OUTPUT>${JSON.stringify(results)}</JSON-OUTPUT>`);
+    console.log(`<STATS>${JSON.stringify({ fnCount: results.fnCount, modulePaths: results.modulePaths })}</STATS>`);
+
   })
   .catch((e) => {
     console.error(e);
@@ -428,7 +448,7 @@ function fnExecute(fnPath, context, args, aux, vmExec = false) {
             const decodedArgs = decodeStr(argumentsList).map((arg) => (arg === "{}" ? someObj : arg));
             //argumentsList = argumentsList.map((arg) => (arg === "{}" ? someObj : arg));
             Reflect.apply(target, someObj, decodedArgs);
-          } catch (error) {}
+          } catch (error) { }
         },
       });
     }
@@ -482,7 +502,7 @@ function fnExecute(fnPath, context, args, aux, vmExec = false) {
       return {
         polluted: true,
         sink: protoMonitor,
-        args: decodeStr(args).map((arg) => (arg === "{}" ? someObj : arg)),
+        args: decodeStr(args).map((arg) => (arg === "{}" ? {} : arg)),
         fnCode: fn,
       };
     }
@@ -513,7 +533,7 @@ function fnExecute(fnPath, context, args, aux, vmExec = false) {
     //   return protoMonitor;
     // } else Reflect.deleteProperty(Object.prototype, "pollutedKey");
   } catch (e) {
-    console.info(e, fn); // Handle any errors that occurred during execution, only turn on for debugging!
+    //console.info(e, fn); // Handle any errors that occurred during execution, only turn on for debugging!
     //fs.appendFileSync(`logs/run_jbx_${pkgLogName}-fixFuzzy-${process.pid}.log`, e.message, { encoding: 'utf8' })
   }
 }
@@ -525,6 +545,7 @@ function vmRun(proxyFunction, fn, inputCase, obj, action = "add", timeout = 100)
     inputCase, // the input cases
     proxyFunction,
     obj,
+    result: {},
   };
   let context, code, script;
   try {
@@ -533,19 +554,19 @@ function vmRun(proxyFunction, fn, inputCase, obj, action = "add", timeout = 100)
     if (action === "del") context.__proto__.pollutedKey = "PP";
 
     // Function to execute the test function in the sandbox
-    //code = `const result = inputCase.call(null, proxyFunction);`;
-    //code = ` proxyFunction(...inputCase); `
-    const code = `const result = Reflect.apply(proxyFunction, obj, inputCase);`;
+    // code = `result.output = proxyFunction.call(null, ...inputCase);`;
+    // code = ` proxyFunction(...inputCase); `;
+    const code = `result.output = Reflect.apply(proxyFunction, null, inputCase);`;
 
     // Create and run the script with a timeout
     script = new vm.Script(code);
-    script.runInContext(context, { timeout: timeout }); // This enforces the timeout
+    script.runInContext(context, { timeout }); // This enforces the timeout
     /*         if (victim.pollutedKey && action !== 'del')
                     return victim.pollutedKey; */
     // The result is handled within the sandbox context
   } catch (e) {
     // Handle timeout or any other error
-    //console.info('error while running code in a vm context: ', e)
+    //console.info("error while running code in a vm context: ", e);
     //fs.appendFileSync(`logs/run_jbx_${pkgLogName}-vmRun${process.pid}.log`, e.message, { encoding: 'utf8' })
   }
 }
@@ -679,7 +700,7 @@ function fnEnumSimple(lib, prefix, depth, globalNameObj = false) {
                     enumList.push(fnPath);
                   }
                 }
-              } catch (error) {}
+              } catch (error) { }
             } else {
               console.info(` [-] Function ${fName}`);
               const fnPath = `${prefix}.${fName}`;
@@ -687,7 +708,7 @@ function fnEnumSimple(lib, prefix, depth, globalNameObj = false) {
             }
           }
         }
-    } catch (error) {}
+    } catch (error) { }
   }
   recurse(lib, prefix, depth);
   return [...new Set(enumList)];
@@ -839,7 +860,7 @@ function pollutionFinder(obj, property, del = false) {
 
     // If not found, recursively search the prototype chain
     return pollutionFinder(Object.getPrototypeOf(obj), property, true);
-  } catch (error) {}
+  } catch (error) { }
 }
 
 async function importModule2(moduleName, resolve = false) {
@@ -941,7 +962,7 @@ function fnEnumerate2(lib, prefix, depth, globalNameObj = false) {
       } else if (typeof prop === "object" && prop !== null) {
         recurse(prop, propPath, depth - 1);
       }
-    } catch (error) {}
+    } catch (error) { }
   }
 
   function recurse(obj, prefix, depth) {
@@ -976,7 +997,7 @@ function fnEnumerate2(lib, prefix, depth, globalNameObj = false) {
           }
         }
       }
-    } catch (error) {}
+    } catch (error) { }
   }
 
   recurse(lib, prefix, depth);
@@ -984,145 +1005,145 @@ function fnEnumerate2(lib, prefix, depth, globalNameObj = false) {
 }
 
 // supporting cjs,esm, and edge cases
-async function loadPackage(pkgName, importModule, globalObj = false) {
-  try {
-    const path = await import("path");
-    const { readFile } = await import("fs/promises");
-    const { createRequire } = await import("module");
-    const require = createRequire(import.meta.url); // Enable require in ESM
-    const pkgPath = require.resolve(pkgName); // Resolve package main file
-    // const pkgDir = path.dirname(pkgPath); // Get package directory
-    const pkgDir = pkgPath.replace(new RegExp(`(${pkgName}).*`), "$1"); // Get package directory
-    const pkgJsonPath = path.join(pkgDir, "package.json"); // Locate package.json
+// async function loadPackage(pkgName, importModule, globalObj = false) {
+//   try {
+//     const path = await import("path");
+//     const { readFile } = await import("fs/promises");
+//     const { createRequire } = await import("module");
+//     const require = createRequire(import.meta.url); // Enable require in ESM
+//     const pkgPath = require.resolve(pkgName); // Resolve package main file
+//     // const pkgDir = path.dirname(pkgPath); // Get package directory
+//     const pkgDir = pkgPath.replace(new RegExp(`(${pkgName}).*`), "$1"); // Get package directory
+//     const pkgJsonPath = path.join(pkgDir, "package.json"); // Locate package.json
 
-    // Read package.json
-    const pkgJson = JSON.parse(await readFile(pkgJsonPath, "utf-8"));
+//     // Read package.json
+//     const pkgJson = JSON.parse(await readFile(pkgJsonPath, "utf-8"));
 
-    const results = {};
+//     const results = {};
 
-    // Track global variables **before** loading
-    const globalBefore = new Set(Object.keys(global));
+//     // Track global variables **before** loading
+//     const globalBefore = new Set(Object.keys(global));
 
-    // Helper function to execute module if it's a function
-    const executeIfFunction = (mod) => (typeof mod === "function" ? mod() : mod);
+//     // Helper function to execute module if it's a function
+//     const executeIfFunction = (mod) => (typeof mod === "function" ? mod() : mod);
 
-    // Try ESM version (via "exports" or "module")
-    if (pkgJson.exports?.import || pkgJson.module) {
-      const esmPath = path.join(pkgDir, pkgJson.exports?.import || pkgJson.module);
-      results.esm = await import(esmPath)
-        .then(executeIfFunction)
-        .catch(() => null);
-    }
+//     // Try ESM version (via "exports" or "module")
+//     if (pkgJson.exports?.import || pkgJson.module) {
+//       const esmPath = path.join(pkgDir, pkgJson.exports?.import || pkgJson.module);
+//       results.esm = await import(esmPath)
+//         .then(executeIfFunction)
+//         .catch(() => null);
+//     }
 
-    // Try CJS version (via "exports" or "main")
-    if (pkgJson.exports?.require || pkgJson.main) {
-      const cjsPath = path.join(pkgDir, pkgJson.exports?.require || pkgJson.main);
-      let mod = require(cjsPath);
+//     // Try CJS version (via "exports" or "main")
+//     if (pkgJson.exports?.require || pkgJson.main) {
+//       const cjsPath = path.join(pkgDir, pkgJson.exports?.require || pkgJson.main);
+//       let mod = require(cjsPath);
 
-      // Handle function-returning modules (e.g., `require('package')()`)
-      if (typeof mod === "function") {
-        mod = mod();
-      }
+//       // Handle function-returning modules (e.g., `require('package')()`)
+//       if (typeof mod === "function") {
+//         mod = mod();
+//       }
 
-      results.cjs = mod;
-    }
+//       results.cjs = mod;
+//     }
 
-    // Track global variables **after** loading
-    const globalAfter = new Set(Object.keys(global));
-    const newGlobals = [...globalAfter].filter((key) => !globalBefore.has(key));
+//     // Track global variables **after** loading
+//     const globalAfter = new Set(Object.keys(global));
+//     const newGlobals = [...globalAfter].filter((key) => !globalBefore.has(key));
 
-    // Store any new global variables introduced by the package
-    if (newGlobals.length && globalObj) {
-      results.globalVars = newGlobals.reduce((acc, key) => {
-        acc[key] = global[key]; // Store the global object reference
-        return acc;
-      }, {});
-    }
+//     // Store any new global variables introduced by the package
+//     if (newGlobals.length && globalObj) {
+//       results.globalVars = newGlobals.reduce((acc, key) => {
+//         acc[key] = global[key]; // Store the global object reference
+//         return acc;
+//       }, {});
+//     }
 
-    //    return results; // Return loaded modules + detected globals
-    return await importModule(pkgName); // Return loaded modules
-  } catch (err) {
-    console.error(`Error loading ${pkgName}:`, err.message);
-    return null;
-  }
-}
+//     //    return results; // Return loaded modules + detected globals
+//     return await importModule(pkgName); // Return loaded modules
+//   } catch (err) {
+//     console.error(`Error loading ${pkgName}:`, err.message);
+//     return null;
+//   }
+// }
 
 // Function to load all module versions (CJS & ESM), no require()() support
-async function loadPackage1(pkgName) {
-  //const { importGlobalNameSpace, importModule } = await import(`${projPath}/fuzzUtils/packageInit.js`);
+// async function loadPackage1(pkgName) {
+//   //const { importGlobalNameSpace, importModule } = await import(`${projPath}/fuzzUtils/packageInit.js`);
+//   const path = await import("path");
+//   const { readFile } = await import("fs/promises");
+//   const { createRequire } = await import("module");
+//   let results = {};
+//   let require, pkgPath, pkgDir, pkgJsonPath, pkgJson;
+//   try {
+//     require = createRequire(import.meta.url); // Enable require in ESM
+//     pkgPath = require.resolve(pkgName); // Resolve package main file
+//     //const pkgDir = path.dirname(pkgPath); // Get package directory
+//     pkgDir = pkgPath.replace(new RegExp(`(${pkgName}).*`), "$1"); // Get package directory
+//     pkgJsonPath = path.join(pkgDir, "package.json"); // Locate package.json
+
+//     // Read package.json
+//     pkgJson = JSON.parse(await readFile(pkgJsonPath, "utf-8"));
+//     // Try ESM version (via "exports" or "module")
+//     if (pkgJson.exports?.import || pkgJson.module) {
+//       const esmPath = path.join(pkgDir, pkgJson.exports?.import || pkgJson.module);
+//       results.esm = await import(esmPath).catch(() => null);
+//     }
+
+//     // Try CJS version (via "exports" or "main")
+//     if (pkgJson.exports?.require || pkgJson.main) {
+//       const cjsPath = path.join(pkgDir, pkgJson.exports?.require || pkgJson.main);
+//       results.cjs = require(cjsPath);
+//     }
+//     if (Object.keys(results).length == 0) {
+//       results = await importModule3(pkgName); // Return loaded modules
+//       //console.log("results", results);
+//     }
+//   } catch (err) {
+//     // manually require the files
+//     let originalDir, originalNodePath;
+//     try {
+//       // Get the path to the module's directory
+//       originalDir = process.cwd();
+//       originalNodePath = process.env.NODE_PATH || "";
+//       process.chdir(pkg.pkgPath);
+//       process.env.NODE_PATH = path.resolve(pkg.pkgPath, "node_modules") + path.delimiter + originalNodePath;
+//       require("module").Module._initPaths();
+//       const index = path.basename(pkgPath);
+//       const moduleDir = path.dirname(pkgPath);
+
+//       // Read the directory to get the list of method files
+//       const methodFiles = fs.readdirSync(moduleDir);
+
+//       // Import each method file individually
+//       let importedModule = {};
+//       for (const file of methodFiles) {
+//         if (file.endsWith(".js") && file !== index) {
+//           const methodName = path.basename(file, ".js");
+//           const methodFilePath = path.join(moduleDir, file);
+//           importedModule[methodName] = require(methodFilePath);
+//         }
+//       }
+//       if (Object.keys(importedModule).length == 0) {
+//         importedModule = await import(moduleName);
+//       }
+//       return importedModule;
+//     } catch (err) {
+//       throw new Error("Error importing module");
+//     } finally {
+//       process.chdir(originalDir);
+//       process.env.NODE_PATH = originalNodePath; // Restore original NODE_PATH
+//     }
+//     //console.error(`Error loading ${pkgName}:`, err.message);
+//   }
+//   return results;
+// }
+async function loadPackage(pkgDir) {
+  let globalPaths = new Set()
   const path = await import("path");
   const { readFile } = await import("fs/promises");
-  const { createRequire } = await import("module");
-  let results = {};
-  let require, pkgPath, pkgDir, pkgJsonPath, pkgJson;
-  try {
-    require = createRequire(import.meta.url); // Enable require in ESM
-    pkgPath = require.resolve(pkgName); // Resolve package main file
-    //const pkgDir = path.dirname(pkgPath); // Get package directory
-    pkgDir = pkgPath.replace(new RegExp(`(${pkgName}).*`), "$1"); // Get package directory
-    pkgJsonPath = path.join(pkgDir, "package.json"); // Locate package.json
-
-    // Read package.json
-    pkgJson = JSON.parse(await readFile(pkgJsonPath, "utf-8"));
-    // Try ESM version (via "exports" or "module")
-    if (pkgJson.exports?.import || pkgJson.module) {
-      const esmPath = path.join(pkgDir, pkgJson.exports?.import || pkgJson.module);
-      results.esm = await import(esmPath).catch(() => null);
-    }
-
-    // Try CJS version (via "exports" or "main")
-    if (pkgJson.exports?.require || pkgJson.main) {
-      const cjsPath = path.join(pkgDir, pkgJson.exports?.require || pkgJson.main);
-      results.cjs = require(cjsPath);
-    }
-    if (Object.keys(results).length == 0) {
-      results = await importModule3(pkgName); // Return loaded modules
-      //console.log("results", results);
-    }
-  } catch (err) {
-    // manually require the files
-    let originalDir, originalNodePath;
-    try {
-      // Get the path to the module's directory
-      originalDir = process.cwd();
-      originalNodePath = process.env.NODE_PATH || "";
-      process.chdir(pkg.pkgPath);
-      process.env.NODE_PATH = path.resolve(pkg.pkgPath, "node_modules") + path.delimiter + originalNodePath;
-      require("module").Module._initPaths();
-      const index = path.basename(pkgPath);
-      const moduleDir = path.dirname(pkgPath);
-
-      // Read the directory to get the list of method files
-      const methodFiles = fs.readdirSync(moduleDir);
-
-      // Import each method file individually
-      let importedModule = {};
-      for (const file of methodFiles) {
-        if (file.endsWith(".js") && file !== index) {
-          const methodName = path.basename(file, ".js");
-          const methodFilePath = path.join(moduleDir, file);
-          importedModule[methodName] = require(methodFilePath);
-        }
-      }
-      if (Object.keys(importedModule).length == 0) {
-        importedModule = await import(moduleName);
-      }
-      return importedModule;
-    } catch (err) {
-      throw new Error("Error importing module");
-    } finally {
-      process.chdir(originalDir);
-      process.env.NODE_PATH = originalNodePath; // Restore original NODE_PATH
-    }
-    //console.error(`Error loading ${pkgName}:`, err.message);
-  }
-  return results;
-}
-
-async function loadPackage2(pkgDir) {
-  const path = await import("path");
-  const { readFile } = await import("fs/promises");
-  const { createRequire } = await import("module");
+  //const { createRequire } = await import("module");
   const fs = await import("fs");
 
   let results = {};
@@ -1130,7 +1151,6 @@ async function loadPackage2(pkgDir) {
   const excludeSet = new Set(["json", "ts", "tsm", "jsx", "tsx", "jsx", "tsx"]);
   const importKeys = new Set(["browser", "jsnext", "main", "module", "import", "jsnext:main", "require", "default"]);
   let require, pkgMainPath, pkgJsonPath, pkgJson;
-
   try {
     require = createRequire(import.meta.url); // Enable require in ESM
     pkgMainPath = require.resolve(pkgDir); // Resolve package main file
@@ -1139,7 +1159,6 @@ async function loadPackage2(pkgDir) {
 
     // Read package.json
     pkgJson = JSON.parse(await readFile(pkgJsonPath, "utf-8"));
-
     // Function to check and add valid file paths
     const checkAndAdd = async (filePath) => {
       let fullPath;
@@ -1149,12 +1168,16 @@ async function loadPackage2(pkgDir) {
       const key = path.extname(fullPath).slice(1);
       const uniqueKey = `${key}-${Math.random().toString(36).substring(7)}`;
       //const uniqueKey = `${key}_${Math.random().toString(36).substring(7)}`;
+      if (fullPath.includes("esm"))
+        console.warn(`ESM module detected at ${fullPath}`);
       if (fs.existsSync(fullPath) && !parsedModule.has(fullPath) && !excludeSet.has(fullPath.split(".").pop())) {
         results[`_m_${uniqueKey}_m_`] =
           //key === "cjs" || key === "js" ? require(fullPath) : await import(fullPath).catch(() => null);
-          await importModule3(fullPath).catch(() => ({}));
+          await importModule3(fullPath, require).catch(() => ({}));
         parsedModule.add(fullPath);
       }
+
+      return fullPath;
     };
 
     // Check standard module fields
@@ -1162,7 +1185,7 @@ async function loadPackage2(pkgDir) {
     if (Object.keys(pkgJson).some((key) => importKeys.has(key))) {
       for (const key of importKeys) {
         if (pkgJson[key] && typeof pkgJson[key] === "string") {
-          await checkAndAdd(pkgJson[key]);
+          globalPaths.add(await checkAndAdd(pkgJson[key]));
         }
       }
     }
@@ -1183,26 +1206,26 @@ async function loadPackage2(pkgDir) {
     if (pkgJson.exports && typeof pkgJson.exports === "object") {
       for (const [key, value] of Object.entries(pkgJson.exports)) {
         if (typeof value === "string") {
-          await checkAndAdd(value);
+          globalPaths.add(await checkAndAdd(value));
         } else if (typeof value === "object") {
           if ("default" in value) {
-            await checkAndAdd(value.default);
+            globalPaths.add(await checkAndAdd(value.default));
           }
           if ("import" in value) {
             if (typeof value.import === "string") {
-              await checkAndAdd(value.import);
+              globalPaths.add(await checkAndAdd(value.import));
             } else if (typeof value.import === "object") {
-              await checkAndAdd(value.import.default);
+              globalPaths.add(await checkAndAdd(value.import.default));
               //results[`${key}.import.types`] = value.import.types || null;
             }
           }
           if ("require" in value) {
             if (typeof value.require === "string") {
               //await checkAndAdd(`${key}.require`, value.require);
-              await checkAndAdd(value.require);
+              globalPaths.add(await checkAndAdd(value.require));
             } else if (typeof value.require === "object") {
               //await checkAndAdd(`${key}.require.default`, value.require.default);
-              await checkAndAdd(value.require.default);
+              globalPaths.add(await checkAndAdd(value.require.default));
               //results[`${key}.require.types`] = value.require.types || null;
             }
           }
@@ -1211,147 +1234,316 @@ async function loadPackage2(pkgDir) {
     }
 
     // Handle edge cases: direct require calls
-    if (Object.keys(results).length === 0 || Object.keys(results)[1] === undefined) {
-      results = await importModule3(pkgName).catch(() => ({}));
+    if (
+      Object.keys(results).length === 0 ||
+      Object.keys(results)[0] === undefined ||
+      (Object.keys(results).length > 1 && Object.keys(results)[1] === undefined) ||
+      (typeof Object.values(results)[0] === "object" && Object.keys(Object.values(results)[0]).length === 0)
+    ) {
+      globalPaths.add(pkgMainPath);
+      results = await importModule3(pkgMainPath, require).catch(() => ({}));
     }
   } catch (err) {
-    console.error(`Error loading ${pkgName}:`, err.message);
+    console.warn(`Error loading ${pkgName}:`, err.message);
+    // try {
+    //   // Get the path to the module's directory
+    //   const require = createRequire(import.meta.url);
+    //   const modulePath = require.resolve(moduleName);
+    //   const index = path.basename(modulePath);
+    //   const moduleDir = path.dirname(modulePath);
+
+    //   // Read the directory to get the list of method files
+    //   const methodFiles = fs.readdirSync(moduleDir);
+
+    //   // Import each method file individually
+    //   let importedModule = {};
+    //   for (const file of methodFiles) {
+    //     if (file.endsWith(".js") && file !== index) {
+    //       const methodName = path.basename(file, ".js");
+    //       const methodFilePath = path.join(moduleDir, file);
+    //       importedModule[methodName] = require(methodFilePath);
+    //     }
+    //   }
+    //   if (Object.keys(importedModule).length == 0) {
+    //     importedModule = await import(moduleName);
+    //   }
+    //   return importedModule;
+    // } catch (error) {
+    //   throw new Error("Error importing module");
+    // }
   }
 
-  return results;
+  return { importedPkg: results, modulePaths: Array.from(globalPaths) };
 }
+// async function loadPackage2(pkgDir) {
+//   const path = await import("path");
+//   const { readFile } = await import("fs/promises");
+//   //const { createRequire } = await import("module");
+//   const fs = await import("fs");
+
+//   let results = {};
+//   const parsedModule = new Set();
+//   const excludeSet = new Set(["json", "ts", "tsm", "jsx", "tsx", "jsx", "tsx"]);
+//   const importKeys = new Set(["browser", "jsnext", "main", "module", "import", "jsnext:main", "require", "default"]);
+//   let require, pkgMainPath, pkgJsonPath, pkgJson;
+//   try {
+//     require = createRequire(import.meta.url); // Enable require in ESM
+//     pkgMainPath = require.resolve(pkgDir); // Resolve package main file
+//     //pkgDir = pkgPath.replace(new RegExp(`(${pkgName}).*`), "$1"); // Get package directory
+//     pkgJsonPath = path.join(pkgDir, "package.json"); // Locate package.json
+
+//     // Read package.json
+//     pkgJson = JSON.parse(await readFile(pkgJsonPath, "utf-8"));
+//     // Function to check and add valid file paths
+//     const checkAndAdd = async (filePath) => {
+//       let fullPath;
+//       if (!filePath || typeof filePath !== "string") return;
+//       fullPath = !filePath.includes(".") ? pkgPath : path.join(pkgDir, filePath);
+//       // determine moduleType based on the file extension
+//       const key = path.extname(fullPath).slice(1);
+//       const uniqueKey = `${key}-${Math.random().toString(36).substring(7)}`;
+//       //const uniqueKey = `${key}_${Math.random().toString(36).substring(7)}`;
+//       if (fs.existsSync(fullPath) && !parsedModule.has(fullPath) && !excludeSet.has(fullPath.split(".").pop())) {
+//         results[`_m_${uniqueKey}_m_`] =
+//           //key === "cjs" || key === "js" ? require(fullPath) : await import(fullPath).catch(() => null);
+//           await importModule3(fullPath, require).catch(() => ({}));
+//         parsedModule.add(fullPath);
+//       }
+//     };
+
+//     // Check standard module fields
+//     // if pkgJson and any property with a key in importKeys
+//     if (Object.keys(pkgJson).some((key) => importKeys.has(key))) {
+//       for (const key of importKeys) {
+//         if (pkgJson[key] && typeof pkgJson[key] === "string") {
+//           await checkAndAdd(pkgJson[key]);
+//         }
+//       }
+//     }
+//     // if (pkgJson.module) {
+//     //   await checkAndAdd(pkgJson.module);
+//     // }
+//     // if (pkgJson["jsnext:main"]) {
+//     //   await checkAndAdd(pkgJson["jsnext:main"]);
+//     // }
+//     // if (pkgJson.exports?.import) {
+//     //   await checkAndAdd(pkgJson.exports?.import);
+//     // }
+//     // if (pkgJson.exports?.require || pkgJson.main) {
+//     //   await checkAndAdd(pkgJson.exports?.require || pkgJson.main);
+//     // }
+
+//     // Handle "exports" field
+//     if (pkgJson.exports && typeof pkgJson.exports === "object") {
+//       for (const [key, value] of Object.entries(pkgJson.exports)) {
+//         if (typeof value === "string") {
+//           await checkAndAdd(value);
+//         } else if (typeof value === "object") {
+//           if ("default" in value) {
+//             await checkAndAdd(value.default);
+//           }
+//           if ("import" in value) {
+//             if (typeof value.import === "string") {
+//               await checkAndAdd(value.import);
+//             } else if (typeof value.import === "object") {
+//               await checkAndAdd(value.import.default);
+//               //results[`${key}.import.types`] = value.import.types || null;
+//             }
+//           }
+//           if ("require" in value) {
+//             if (typeof value.require === "string") {
+//               //await checkAndAdd(`${key}.require`, value.require);
+//               await checkAndAdd(value.require);
+//             } else if (typeof value.require === "object") {
+//               //await checkAndAdd(`${key}.require.default`, value.require.default);
+//               await checkAndAdd(value.require.default);
+//               //results[`${key}.require.types`] = value.require.types || null;
+//             }
+//           }
+//         }
+//       }
+//     }
+
+//     // Handle edge cases: direct require calls
+//     if (
+//       Object.keys(results).length === 0 ||
+//       Object.keys(results)[0] === undefined ||
+//       (Object.keys(results).length > 1 && Object.keys(results)[1] === undefined) ||
+//       (typeof Object.values(results)[0] === "object" && Object.keys(Object.values(results)[0]).length === 0)
+//     ) {
+//       results = await importModule3(pkgMainPath, require).catch(() => ({}));
+//     }
+//   } catch (err) {
+//     console.warn(`Error loading ${pkgName}:`, err.message);
+//     // try {
+//     //   // Get the path to the module's directory
+//     //   const require = createRequire(import.meta.url);
+//     //   const modulePath = require.resolve(moduleName);
+//     //   const index = path.basename(modulePath);
+//     //   const moduleDir = path.dirname(modulePath);
+
+//     //   // Read the directory to get the list of method files
+//     //   const methodFiles = fs.readdirSync(moduleDir);
+
+//     //   // Import each method file individually
+//     //   let importedModule = {};
+//     //   for (const file of methodFiles) {
+//     //     if (file.endsWith(".js") && file !== index) {
+//     //       const methodName = path.basename(file, ".js");
+//     //       const methodFilePath = path.join(moduleDir, file);
+//     //       importedModule[methodName] = require(methodFilePath);
+//     //     }
+//     //   }
+//     //   if (Object.keys(importedModule).length == 0) {
+//     //     importedModule = await import(moduleName);
+//     //   }
+//     //   return importedModule;
+//     // } catch (error) {
+//     //   throw new Error("Error importing module");
+//     // }
+//   }
+
+//   return results;
+// }
 
 // Function to load all module versions (CJS & ESM, ES2015), no require()() support
-async function loadPackage3(pkgName) {
-  //const { importGlobalNameSpace, importModule } = await import(`${projPath}/fuzzUtils/packageInit.js`);
-  const path = await import("path");
-  const { readFile } = await import("fs/promises");
-  const { createRequire } = await import("module");
-  let results = {};
-  let require, pkgPath, pkgDir, pkgJsonPath, pkgJson;
-  try {
-    require = createRequire(import.meta.url); // Enable require in ESM
-    pkgPath = require.resolve(pkgName); // Resolve package main file
-    //const pkgDir = path.dirname(pkgPath); // Get package directory
-    pkgDir = pkgPath.replace(new RegExp(`(${pkgName}).*`), "$1"); // Get package directory
-    pkgJsonPath = path.join(pkgDir, "package.json"); // Locate package.json
+// async function loadPackage3(pkgName) {
+//   //const { importGlobalNameSpace, importModule } = await import(`${projPath}/fuzzUtils/packageInit.js`);
+//   const path = await import("path");
+//   const { readFile } = await import("fs/promises");
+//   const { createRequire } = await import("module");
+//   let results = {};
+//   let require, pkgPath, pkgDir, pkgJsonPath, pkgJson;
+//   try {
+//     require = createRequire(import.meta.url); // Enable require in ESM
+//     pkgPath = require.resolve(pkgName); // Resolve package main file
+//     //const pkgDir = path.dirname(pkgPath); // Get package directory
+//     pkgDir = pkgPath.replace(new RegExp(`(${pkgName}).*`), "$1"); // Get package directory
+//     pkgJsonPath = path.join(pkgDir, "package.json"); // Locate package.json
 
-    // Read package.json
-    pkgJson = JSON.parse(await readFile(pkgJsonPath, "utf-8"));
-    // Try ESM version (via "exports" or "module")
-    if (pkgJson.exports?.import || pkgJson.module) {
-      const esmPath = path.join(pkgDir, pkgJson.exports?.import || pkgJson.module || pkgJson["jsnext:main"]);
-      results.esm = await import(esmPath).catch(() => null);
-    }
-    if (pkgJson["jsnext:main"]) {
-      const es6Path = path.join(pkgDir, pkgJson["jsnext:main"]);
-      results.es6 = await import(es6Path).catch(() => null);
-    }
-    // Try CJS version (via "exports" or "main")
-    if (pkgJson.exports?.require || pkgJson.main) {
-      const cjsPath = path.join(pkgDir, pkgJson.exports?.require || pkgJson.main);
-      results.cjs = require(cjsPath);
-    }
-    if (Object.keys(results).length == 0) {
-      results = await importModule3(pkgName); // Return loaded modules
-      //console.log("results", results);
-    }
-  } catch (err) {
-    // manually require the files
-    let originalDir, originalNodePath;
-    try {
-      // Get the path to the module's directory
-      originalDir = process.cwd();
-      originalNodePath = process.env.NODE_PATH || "";
-      process.chdir(pkg.pkgPath);
-      process.env.NODE_PATH = path.resolve(pkg.pkgPath, "node_modules") + path.delimiter + originalNodePath;
-      require("module").Module._initPaths();
-      const index = path.basename(pkgPath);
-      const moduleDir = path.dirname(pkgPath);
+//     // Read package.json
+//     pkgJson = JSON.parse(await readFile(pkgJsonPath, "utf-8"));
+//     // Try ESM version (via "exports" or "module")
+//     if (pkgJson.exports?.import || pkgJson.module) {
+//       const esmPath = path.join(pkgDir, pkgJson.exports?.import || pkgJson.module || pkgJson["jsnext:main"]);
+//       results.esm = await import(esmPath).catch(() => null);
+//     }
+//     if (pkgJson["jsnext:main"]) {
+//       const es6Path = path.join(pkgDir, pkgJson["jsnext:main"]);
+//       results.es6 = await import(es6Path).catch(() => null);
+//     }
+//     // Try CJS version (via "exports" or "main")
+//     if (pkgJson.exports?.require || pkgJson.main) {
+//       const cjsPath = path.join(pkgDir, pkgJson.exports?.require || pkgJson.main);
+//       results.cjs = require(cjsPath);
+//     }
+//     if (Object.keys(results).length == 0) {
+//       results = await importModule3(pkgName); // Return loaded modules
+//       //console.log("results", results);
+//     }
+//   } catch (err) {
+//     // manually require the files
+//     let originalDir, originalNodePath;
+//     try {
+//       // Get the path to the module's directory
+//       originalDir = process.cwd();
+//       originalNodePath = process.env.NODE_PATH || "";
+//       process.chdir(pkg.pkgPath);
+//       process.env.NODE_PATH = path.resolve(pkg.pkgPath, "node_modules") + path.delimiter + originalNodePath;
+//       require("module").Module._initPaths();
+//       const index = path.basename(pkgPath);
+//       const moduleDir = path.dirname(pkgPath);
 
-      // Read the directory to get the list of method files
-      const methodFiles = fs.readdirSync(moduleDir);
+//       // Read the directory to get the list of method files
+//       const methodFiles = fs.readdirSync(moduleDir);
 
-      // Import each method file individually
-      let importedModule = {};
-      for (const file of methodFiles) {
-        if (file.endsWith(".js") && file !== index) {
-          const methodName = path.basename(file, ".js");
-          const methodFilePath = path.join(moduleDir, file);
-          importedModule[methodName] = require(methodFilePath);
-        }
-      }
-      if (Object.keys(importedModule).length == 0) {
-        importedModule = await import(moduleName);
-      }
-      return importedModule;
-    } catch (err) {
-      throw new Error("Error importing module");
-    } finally {
-      process.chdir(originalDir);
-      process.env.NODE_PATH = originalNodePath; // Restore original NODE_PATH
-    }
-    //console.error(`Error loading ${pkgName}:`, err.message);
-  }
-  return results;
-}
+//       // Import each method file individually
+//       let importedModule = {};
+//       for (const file of methodFiles) {
+//         if (file.endsWith(".js") && file !== index) {
+//           const methodName = path.basename(file, ".js");
+//           const methodFilePath = path.join(moduleDir, file);
+//           importedModule[methodName] = require(methodFilePath);
+//         }
+//       }
+//       if (Object.keys(importedModule).length == 0) {
+//         importedModule = await import(moduleName);
+//       }
+//       return importedModule;
+//     } catch (err) {
+//       throw new Error("Error importing module");
+//     } finally {
+//       process.chdir(originalDir);
+//       process.env.NODE_PATH = originalNodePath; // Restore original NODE_PATH
+//     }
+//     //console.error(`Error loading ${pkgName}:`, err.message);
+//   }
+//   return results;
+// }
 
 // Function to load all module versions (CJS & ESM), no global object support
-async function loadPackage4(pkgName, importModule) {
-  const path = await import("path");
-  const { readFile } = await import("fs/promises");
-  const { createRequire } = await import("module");
-  try {
-    const require = createRequire(import.meta.url); // Enable require in ESM
-    const pkgPath = require.resolve(pkgName); // Resolve package main file
-    // const pkgDir = path.dirname(pkgPath); // Get package directory
-    const pkgDir = pkgPath.replace(new RegExp(`(${pkgName}).*`), "$1"); // Get package directory
-    const pkgJsonPath = path.join(pkgDir, "package.json"); // Locate package.json
+// async function loadPackage4(pkgName, importModule) {
+//   const path = await import("path");
+//   const { readFile } = await import("fs/promises");
+//   const { createRequire } = await import("module");
+//   try {
+//     const require = createRequire(import.meta.url); // Enable require in ESM
+//     const pkgPath = require.resolve(pkgName); // Resolve package main file
+//     // const pkgDir = path.dirname(pkgPath); // Get package directory
+//     const pkgDir = pkgPath.replace(new RegExp(`(${pkgName}).*`), "$1"); // Get package directory
+//     const pkgJsonPath = path.join(pkgDir, "package.json"); // Locate package.json
 
-    // Read package.json
-    const pkgJson = JSON.parse(await readFile(pkgJsonPath, "utf-8"));
+//     // Read package.json
+//     const pkgJson = JSON.parse(await readFile(pkgJsonPath, "utf-8"));
 
-    const results = {};
+//     const results = {};
 
-    // Helper function to handle modules that return a function
-    const executeIfFunction = (mod) => (typeof mod === "function" ? mod() : mod);
+//     // Helper function to handle modules that return a function
+//     const executeIfFunction = (mod) => (typeof mod === "function" ? mod() : mod);
 
-    // Try ESM version (via "exports" or "module")
-    if (pkgJson.exports?.import || pkgJson.module) {
-      const esmPath = path.join(pkgDir, pkgJson.exports?.import || pkgJson.module);
-      results.esm = await import(esmPath)
-        .then(executeIfFunction)
-        .catch(() => null);
-    }
+//     // Try ESM version (via "exports" or "module")
+//     if (pkgJson.exports?.import || pkgJson.module) {
+//       const esmPath = path.join(pkgDir, pkgJson.exports?.import || pkgJson.module);
+//       results.esm = await import(esmPath)
+//         .then(executeIfFunction)
+//         .catch(() => null);
+//     }
 
-    // Try CJS version (via "exports" or "main")
-    if (pkgJson.exports?.require || pkgJson.main) {
-      const cjsPath = path.join(pkgDir, pkgJson.exports?.require || pkgJson.main);
-      results.cjs = executeIfFunction(require(cjsPath));
-    }
+//     // Try CJS version (via "exports" or "main")
+//     if (pkgJson.exports?.require || pkgJson.main) {
+//       const cjsPath = path.join(pkgDir, pkgJson.exports?.require || pkgJson.main);
+//       results.cjs = executeIfFunction(require(cjsPath));
+//     }
 
-    return await importModule(pkgName); // Return loaded modules
-  } catch (err) {
-    console.error(`Error loading ${pkgName}:`, err.message);
-    return null;
-  }
-}
+//     return await importModule(pkgName); // Return loaded modules
+//   } catch (err) {
+//     console.error(`Error loading ${pkgName}:`, err.message);
+//     return null;
+//   }
+// }
 
-async function importModule3(moduleName) {
-  const { createRequire } = await import("module");
-  const originalDir = process.cwd();
-  const originalNodePath = process.env.NODE_PATH || "";
-  process.chdir(pkgPath);
-  const originalPath = originalNodePath ? path.delimiter + originalNodePath : "";
-  process.env.NODE_PATH = path.resolve(pkgPath, "node_modules") + originalPath;
-  const require = createRequire(import.meta.url); // Enable require in ESM
-  require("module").Module._initPaths();
+async function importModule3(moduleName, require) {
+  // const { createRequire } = await import("module");
+  // const originalDir = process.cwd();
+  // const originalNodePath = process.env.NODE_PATH || "";
+  // process.chdir(pkgPath);
+  // const originalPath = originalNodePath ? path.delimiter + originalNodePath : "";
+  // process.env.NODE_PATH = path.resolve(pkgPath, "node_modules") + originalPath;
+  // //const require = createRequire(import.meta.url); // Enable require in ESM
+  // //const require = createRequire(moduleName);
+  // //pkgMainPath = require.resolve(moduleName); // Resolve package main file
+  // require("module").Module._initPaths();
   try {
     return require(moduleName);
   } catch (e) {
     console.log("Trying dynamic import..");
     try {
-      return await import(moduleName);
+      // If require fails, attempt a dynamic import
+      const modulePath = require.resolve(moduleName);
+      const moduleUrl = pathToFileURL(modulePath).href;
+      const importedModule = await import(moduleUrl);
+      return importedModule.default || importedModule;
+      //return await import(moduleName);
     } catch (e) {
       console.log("Trying files import..");
       try {
@@ -1360,6 +1552,33 @@ async function importModule3(moduleName) {
           const importedPkg = await import(path.resolve(pkgPath, "node_modules") + "/" + suggestedPath[1]);
           //if (typeof importedModule.default === "object")
           return importedPkg.default;
+        } else {
+          try {
+            // Get the path to the module's directory
+            const require = createRequire(import.meta.url);
+            const modulePath = require.resolve(moduleName);
+            const index = path.basename(modulePath);
+            const moduleDir = path.dirname(modulePath);
+
+            // Read the directory to get the list of method files
+            const methodFiles = fs.readdirSync(moduleDir);
+
+            // Import each method file individually
+            let importedModule = {};
+            for (const file of methodFiles) {
+              if (file.endsWith(".js") && file !== index) {
+                const methodName = path.basename(file, ".js");
+                const methodFilePath = path.join(moduleDir, file);
+                importedModule[methodName] = require(methodFilePath);
+              }
+            }
+            if (Object.keys(importedModule).length == 0) {
+              importedModule = await import(moduleName);
+            }
+            return importedModule;
+          } catch (error) {
+            throw new Error("Error importing module");
+          }
         }
       } catch (e) {
         try {
@@ -1391,7 +1610,7 @@ async function importModule3(moduleName) {
       }
     }
   } finally {
-    process.chdir(originalDir);
-    process.env.NODE_PATH = originalNodePath; // Restore original NODE_PATH
+    //process.chdir(originalDir);
+    //process.env.NODE_PATH = originalNodePath; // Restore original NODE_PATH
   }
 }

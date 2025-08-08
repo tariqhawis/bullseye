@@ -599,12 +599,9 @@ function findCallOfInterest(enumCases, pkgImports, pkg, fn) {
           //   }
           // }
           //if (/*firstPartKey === reqKey.substring(5) &&*/ !callsOfInterest.has(fn))
-          const searchByFn = enumCases.has(`#Call#${fn.replace("pkgMainFunc", firstPartKey)}`)
+          const searchByFn = enumCases.has(`#Call#${fn.replace("pkgMainFunc", firstPartKey)}`)?
             ? enumCases.get(`#Call#${fn.replace("pkgMainFunc", firstPartKey)}`)
             : undefined;
-          // const searchByFn = fn.includes(".")
-          //   ? enumCases.get(`#Call#${fn.replace("pkgMainFunc", firstPartKey)}`)
-          //   : undefined;
           if (searchByFn) {
             callsOfInterest.set(fn, searchByFn);
             break casesLoop;
@@ -673,21 +670,22 @@ function findCallOfInterest(enumCases, pkgImports, pkg, fn) {
   return callsOfInterest;
 }
 
-// const code = fs.readFileSync(
-//   //"/home/tariq/benchmark/benchmark-ss/controlled_merge_lib/node_modules/controlled-merge/test/tests.js",
-//   "/home/tariq/benchmark/arteau-15/assign_deep-0.4.6/repo-assign_deep/test.js",
-//   "utf8"
-// );
-// const [enumCases, pkgImports, fnOfInterest] = analyzeTestCase(code);
-// console.log("Global Scope Variables: ", enumCases);
-// console.log("Required Vars Variables: ", pkgImports);
-// // // functions Of Interest collects all the function calls that are related to the package that are imported at the beginning of the file
-// // // we then refine the list by the given function name to get the function calls of interest
-// console.log("Functions of Interest: ", fnOfInterest);
-// // // only fetch the matching function calls
-// const callsOfInterest = findCallOfInterest(fnOfInterest, pkgImports, "assign-deep", "pkgMainFunc");
-// console.log("Calls of Interest: ", JSON.stringify(Array.from(callsOfInterest), null, 2));
-// // const pkgImports=new Map(JSON.parse('[["#REQ#instanceToInstance","../../src/index"],["#REQ#classToClassFromExist","../../src/index"],["#REQ#instanceToPlain","../../src/index"],["#REQ#classToPlainFromExist","../../src/index"],["#REQ#plainToInstance","../../src/index"],["#REQ#plainToClassFromExist","../../src/index"],["#REQ#defaultMetadataStorage","../../src/storage"],["#REQ#Exclude","../../src/decorators"],["#REQ#Expose","../../src/decorators"],["#REQ#Type","../../src/decorators"],["#REQ#Transform","../../src/decorators"]]'));
-// // const callsOfInterest = findCallOfInterest(fnOfInterest, pkgImports, "class-transformer", "pkgMainFunc.classToPlainFromExist");
+const code = fs.readFileSync(
+  //"/home/tariq/benchmark/benchmark-ss/controlled_merge_lib/node_modules/controlled-merge/test/tests.js",
+  //"/home/tariq/benchmark/arteau-15/assign_deep-0.4.6/repo-assign_deep/test.js",
+  "/data/benchmark/odgen19/magico-1.1.1/repo-magico/test/index.test.js",
+  "utf8"
+);
+const [enumCases, pkgImports, fnOfInterest] = analyzeTestCase(code);
+console.log("Global Scope Variables: ", enumCases);
+console.log("Required Vars Variables: ", pkgImports);
+// // functions Of Interest collects all the function calls that are related to the package that are imported at the beginning of the file
+// // we then refine the list by the given function name to get the function calls of interest
+console.log("Functions of Interest: ", fnOfInterest);
+// // only fetch the matching function calls
+const callsOfInterest = findCallOfInterest(fnOfInterest, pkgImports, "magico", "pkgMainFunc.set");
+console.log("Calls of Interest: ", JSON.stringify(Array.from(callsOfInterest), null, 2));
+// const pkgImports=new Map(JSON.parse('[["#REQ#instanceToInstance","../../src/index"],["#REQ#classToClassFromExist","../../src/index"],["#REQ#instanceToPlain","../../src/index"],["#REQ#classToPlainFromExist","../../src/index"],["#REQ#plainToInstance","../../src/index"],["#REQ#plainToClassFromExist","../../src/index"],["#REQ#defaultMetadataStorage","../../src/storage"],["#REQ#Exclude","../../src/decorators"],["#REQ#Expose","../../src/decorators"],["#REQ#Type","../../src/decorators"],["#REQ#Transform","../../src/decorators"]]'));
+// const callsOfInterest = findCallOfInterest(fnOfInterest, pkgImports, "class-transformer", "pkgMainFunc.classToPlainFromExist");
 
 module.exports = { analyzeTestCase, findCallOfInterest };

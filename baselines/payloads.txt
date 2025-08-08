@@ -1,0 +1,44 @@
+    BAD_JSON  \\
+    BAD_JSON, victim  \\
+    victim, BAD_JSON  \\
+    BAD_JSON, BAD_JSON  \\
+    victim, victim, BAD_JSON  \\
+    victim, victim, victim, BAD_JSON  \\
+    victim, "\proto.pollutedKey", 123  \\
+    victim, "\proto[pollutedKey]", 123  \\
+    ``\proto.pollutedKey", 123  \\
+    ``\proto[pollutedKey]", 123  \\
+    victim, "\proto", "pollutedKey", 123  \\
+    ``\proto", "pollutedKey", 123  \\
+    victim, BAD_JSON, victim  \\
+    victim, BAD_JSON, true  \\
+    true, victim, BAD_JSON  \\
+    victim, true, BAD_JSON  \\
+    true, victim, BAD_JSON2  \\
+    victim, BAD_JSON2  \\
+    BAD_JSON2  \\
+    ``[\proto]\\npollutedKey=123"  \\
+    victim, ``constructor.prototype.pollutedKey", ``pollutedValue"  \\
+    ``\proto.pollutedKey", victim, ``pollutedValue"  \\
+    ``this.constructor.prototype.pollutedKey", victim, ``pollutedValue"  \\
+    ``\proto.pollutedKey", ``pollutedValue", victim  \\
+    victim, "/\proto/pollutedKey", ``pollutedValue"  \\
+    victim, "/\proto/pollutedKey", ``pollutedValue", true  \\
+    ``\proto.pollutedKey=123"  \\
+    ``\proto:pollutedKey", ``pollutedValue"  \\
+    ``\proto[pollutedKey]=123", victim  \\
+    victim, "constructor/prototype/pollutedKey", ``pollutedValue", "/"  \\
+    ``\proto", { "pollutedKey": ``pollutedValue" }, victim, true  \\
+    { "\proto.pollutedKey": ``pollutedValue" }  \\
+    { ``constructor.prototype.pollutedKey": ``pollutedValue" }  \\
+    victim, [[``\proto"], "pollutedKey"], ``pollutedValue"  \\
+    [[``\proto"], "pollutedKey"], ``pollutedValue", victim  \\
+    victim, [[``\proto"], "pollutedKey"], ``pollutedValue", true  \\
+    victim, [``\proto", "pollutedKey"], ``pollutedValue"  \\
+    victim, [``constructor.prototype.pollutedKey"], ``pollutedValue"  \\
+    [``\proto"], "pollutedKey", ``pollutedValue"  \\
+    [``\proto.pollutedKey"], [``pollutedValue"]  \\
+    victim, [[``\proto"], [``\proto"], "pollutedKey"], ``pollutedValue"  \\
+    [``-constructor.prototype.pollutedKey", ``pollutedValue"]  \\
+    ``filename" ⇒ [\proto]\npollutedKey=``pollutedValue"  \\
+    ``filename" ⇒ [constructor]\nprototype.pollutedKey=``pollutedValue"  \\

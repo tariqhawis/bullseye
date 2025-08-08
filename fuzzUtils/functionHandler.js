@@ -66,6 +66,7 @@ function decodeBase64Strings(array) {
 function decodeStr(args) {
   const base64Seeds = [
     "Int9Ll9fcHJvdG9fXyI=",
+    "IntcIl9fcHJvdG9fX1wiOntcInBvbGx1dGVkS2V5XCI6XCIxMzJcIn19Ig==",
     "IntcIl9fcHJvdG9fX1wiOntcInBvbGx1dGVkS2V5XCI6XCJwb2xsdXRlZFZhbHVlXCJ9fSI=",
     "WyJfX3Byb3RvX18iLCJwb2xsdXRlZEtleSJd",
     "WyJfX3Byb3RvX18iLCJwb2xsdXRlZEtleSIsInBvbGx1dGVkVmFsdWUiXQ==",

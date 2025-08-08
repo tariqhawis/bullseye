@@ -1,0 +1,35 @@
+{
+    "name": "fuzzproto",
+    "description": "static and dynamic security scanning tool that detect prototype pollution and ReDoS in npm packages",
+    "version": "1.0.0",
+    "main": "scripts/runner.wild.js",
+    "directories": {
+        "test": "test"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/tariqhawis/jsandbox.git"
+    },
+    "keywords": [
+        "prototype_pollution",
+        "fuzzing_analysis",
+        "dynamic_analysis"
+    ],
+    "author": "tariqhawis",
+    "license": "ISC",
+    "bugs": {
+        "url": "https://github.com/tariqhawis/npm-analysis/issues"
+    },
+    "homepage": "https://github.com/tariqhawis/npm-analysis#readme",
+    "dependencies": {
+        "acorn": "^8.11.3",
+        "acorn-loose": "^8.4.0",
+        "acorn-typescript": "^1.4.13",
+        "acorn-walk": "^8.3.3",
+        "cloc": "^2.2.0-cloc",
+        "dotenv": "^16.4.7",
+        "escodegen": "^2.1.0",
+        "glob": "^11.0.0",
+        "pict-pairwise-testing": "^1.1.0"
+    }
+}

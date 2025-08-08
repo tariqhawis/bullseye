@@ -1,0 +1,15 @@
+AssignmentExpression
+ConditionalExpression
+UnaryExpression
+FunctionExpression
+SpreadElement
+TemplateLiteral
+AwaitExpression
+BinaryExpression
+ChainExpression
+ThisExpression
+LogicalExpression
+Super
+PrivateIdentifier
+SequenceExpression
+UpdateExpression

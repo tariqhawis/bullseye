@@ -3,6 +3,8 @@ import vm from "vm";
 import fs from "fs";
 import path from "path";
 import { glob } from "glob";
+import { pathToFileURL } from "url";
+import { createRequire } from "module";
 var BAD_JSON = {};
 var fnList = [];
 var resultsBuffer = [];
@@ -11,7 +13,7 @@ var victim = {};
 var someObj = {};
 
 const projPath = "/home/tariq/bulleyes"; // host path
-// const projPath = "/usr/src/app"; // docker path
+//const projPath = "/usr/src/app"; // docker path
 const fixedCases = JSON.parse(fs.readFileSync(`${projPath}/fuzzPaterns.json`, "utf-8"));
 let pkg = {};
 
@@ -21,17 +23,14 @@ if (process.argv[2]) {
   pkg = JSON.parse(process.argv[2]);
 } else {
   pkg = {
-    // package_name: "assign-deep",
-    // version: "0.4.6",
-    // pkgPath: "/home/tariq/benchmark/arteau-15/assign_deep-0.4.6",
-    package_name: "lodash",
-    version: "4.17.4",
-    pkgPath: "/home/tariq/benchmark/arteau-15/lodash-4.17.4",
+    package_name: "objtools",
+    version: "3.0.0",
+    pkgPath: "/home/tariq/benchmark/ss-100/objtools-3.0.0",
     options: {
       verbose: true,
       sandbox: false,
       vm: true,
-      fixFuzz: false,
+      fixFuzz: true,
       maxTestFiles: 1500,
       multiVectors: false, // More than one function might detect the same sink, so we may get redundant sink locations,
       unknownSideEffect: true, // If true, the detection will be limited to the local scope of the function
@@ -135,7 +134,7 @@ let pkgTimestamp = Date.now();
         if (pkg.options.fixFuzz)
           fnLoop: for (const funcPath of fnList) {
             //const fn = funcPath.replace(/\.cjs|\.esm/, "");
-            const fn = funcPath.replace(/\.\_m\_[^\_]+\_m\_/, "");
+            const fn = funcPath.replace(/\.\_m\_[^\_]+\_m\_/, "").replace(".prototype.constructor", "");
             try {
               fixedCases.forEach((exploitArgs) => {
                 cleanUpProto(newObjectProto);
@@ -148,7 +147,7 @@ let pkgTimestamp = Date.now();
                 ); // results resultsBuffer
                 cleanUpProto(newObjectProto);
                 //if (exeOutput?.polluted && fnMap.get(pkgName) !== fn) {
-                if (exeOutput?.polluted) {
+                if (exeOutput?.polluted /*&& exeOutput.sink === "null"*/) {
                   //if the fn is not exist in fnMap, then add it
                   //if (verbose) console.info("Detected: ", `${funcPath}(${exploitArgs.sig})`);
                   // if (!exeOutput.sink) {
@@ -163,13 +162,15 @@ let pkgTimestamp = Date.now();
                   //     return [key, value ? value.replace(`${pkg.pkgPath}/`, "").replace(`${funcPath}/`, "") : null];
                   //   })
                   // );
-                  const sink = Object.values(exeOutput.sink).join("") === "" ? "null" : exeOutput.sink;
-                  const sinkV =
-                    Object.values(exeOutput.sink).join("") === "" ? "null" : Object.values(exeOutput.sink).join(",");
+                  //const sink = Object.values(exeOutput.sink).join("") === "" ? "null" : exeOutput.sink;
+                  //const sink =
+                  //Object.values(exeOutput.sink).join("") === "" ? "null" : Object.values(exeOutput.sink).join(",");
+                  const sink = exeOutput.sink;
+
                   const detection = {
                     entryPoint: funcPath,
                     inputCase: exeOutput.args,
-                    sinkLocation: sink,
+                    sinkLocation: exeOutput.sink ?? null,
                     polluted: exeOutput?.polluted,
                     mode: "fixed",
                   };
@@ -178,17 +179,17 @@ let pkgTimestamp = Date.now();
                   // add a map to store the detected sink locations, with the entry point as the key
                   //vectorMap.set(funcPath, exeOutput.sink);
                   if (pkg.options.multiVectors) {
-                    vectorMap.set(fn, sinkV);
-                    detectedSink.add(sinkV);
+                    vectorMap.set(fn, sink);
+                    detectedSink.add(sink);
                     detectionArray.push(detection);
                     //} else if (!detectedSink.has(sink)) {
-                    if (verbose) console.log(`${fn}(${input}) -> ${JSON.stringify(sinkV)}`);
+                    if (verbose) console.log(`${funcPath}(${input}) -> ${JSON.stringify(sink)}`);
                     if (sandbox) console.log(`<DETECTION>${JSON.stringify(detection)}</DETECTION>`);
-                  } else if (vectorMap.get(fn) !== sinkV) {
-                    vectorMap.set(fn, sinkV);
-                    detectedSink.add(sinkV);
+                  } else if (vectorMap.get(fn) !== sink) {
+                    vectorMap.set(fn, sink);
+                    detectedSink.add(sink);
                     detectionArray.push(detection);
-                    if (verbose) console.log(`${fn}(${input}) -> ${JSON.stringify(sinkV)}`);
+                    if (verbose) console.log(`${funcPath}(${exeOutput.hash}) -> ${JSON.stringify(sink)}`);
                     if (sandbox) console.log(`<DETECTION>${JSON.stringify(detection)}</DETECTION>`);
                   }
                   //if (exeOutput.sink && (exeOutput.sink.setProp || exeOutput.sink.setProto))
@@ -201,99 +202,103 @@ let pkgTimestamp = Date.now();
             }
           }
 
-        fnLoop: for (const fnObj of fnList) {
-          //const fn = fnObj.replace(/\.cjs|\.esm/, "");
-          const fn = fnObj.replace(/\.\_m\_[^\_]+\_m\_/, "");
-          try {
-            for (const [testFile, inputList] of testCasesMap) {
-              const locatedFnOI = findCallOfInterest(inputList[2], inputList[1], pkgName, fn);
-              if (locatedFnOI.size === 0) continue;
-              //console.info(locatedFnOI)
-              // check if the there is a test input for the function in the inputList map. The key is the function name (e.g., 'pkgMainFunc'). It may also be 'pkgMainFunc.fn1.fn2'
-              if (locatedFnOI.has(fn)) {
-                console.info(`Processing function: ${fn}`);
-                const exploitCases = generateExploits(locatedFnOI.get(fn));
-                if (exploitCases.length > 0) {
-                  for (let exploitInputs of exploitCases) {
-                    for (let exploitArgs of exploitInputs) {
-                      //console.info(exploitArgs);
-                      //console.info(`Executing function: ${fn} with inputs: ${exploitArgs}`);
-                      // check of exploitArgs is identically equal to: exploitArgs===['e30=', 'IntcIl9fcHJvdG9fX1wiOntcInBvbGx1dGVkS2V5XCI6XCJwb2xsdXRlZFZhbHVlXCJ9fSI=']
-                      // if (exploitArgs.length === 2 && exploitArgs[0] === 'e30=' && exploitArgs[1] === 'IntcIl9fcHJvdG9fX1wiOntcInBvbGx1dGVkS2V5XCI6XCJwb2xsdXRlZFZhbHVlXCJ9fSI=')
-                      cleanUpProto(newObjectProto);
-                      const exeOutput = fnExecute(
-                        fnObj,
-                        importedPkg,
-                        exploitArgs,
-                        { cleanUpProto, copyPrototypeChain, decodeStr, verify },
-                        vmExec
-                      );
-                      //exeOutput = await forkExe(packagePath, fn, exploitArgs);
-                      /*                                                     exeOutput = spawnSync('node',
-                             ['../${projPath}/fuzzUtils/execFn.js', fn, packagePath, JSON.stringify(exploitArgs)],
-                                { encoding: 'utf8', stdio: 'inherit' }); */
-                      if (nameSpaceObj && nameSpaceObj.length > 0)
-                        exeOutput = fnExecute(fn, nameSpaceObj, exploitArgs, globalObj, vmExec);
-                      // restore the original prototype chain
-                      cleanUpProto(newObjectProto);
-                      if (exeOutput?.polluted) {
-                        fnMap.set(pkgName, fn);
-                        // const sink = new Map(
-                        //   Array.from(exeOutput.sink).map(([key, value]) => {
-                        //     return [
-                        //       key,
-                        //       value ? value.replace(`${pkg.pkgPath}/`, "").replace(`${funcPath}/`, "") : null,
-                        //     ];
-                        //   })
-                        // );
-                        const sink = Object.values(exeOutput.sink).join("") === "" ? "null" : exeOutput.sink;
-                        const sinkV =
-                          Object.values(exeOutput.sink).join("") === ""
-                            ? "null"
-                            : Object.values(exeOutput.sink).join(",");
-                        const detection = {
-                          entryPoint: fnObj,
-                          inputCase: exeOutput.args,
-                          sinkLocation: sink ?? null,
-                          polluted: exeOutput?.polluted,
-                          mode: "pairwise",
-                          testFile: testFile.replace(`${pkgPath}/node_modules/${pkg.package_name}`, ""),
-                        };
-                        const input = JSON.stringify(exeOutput.args);
-                        const exploit = `${fn}#${input}`;
-                        // add a map to store the detected sink locations, with the entry point as the key
-                        //vectorMap.set(funcPath, exeOutput.sink);
-                        if (pkg.options.multiVectors) {
-                          vectorMap.set(fn, sinkV);
-                          detectedSink.add(sinkV);
-                          detectionArray.push(detection);
-                          //} else if (!detectedSink.has(sink)) {
-                          if (verbose) console.log(`${fn}(${input}) -> ${JSON.stringify(sinkV)}`);
-                          if (sandbox) console.log(`<DETECTION>${JSON.stringify(detection)}</DETECTION>`);
-                        } else if (vectorMap.get(fn) !== sinkV) {
-                          vectorMap.set(fn, sinkV);
-                          detectedSink.add(sinkV);
-                          detectionArray.push(detection);
-                          if (verbose) console.log(`${fn}(${input}) -> ${JSON.stringify(sinkV)}`);
-                          if (sandbox) console.log(`<DETECTION>${JSON.stringify(detection)}</DETECTION>`);
-                        }
-                        //if (exeOutput.sink && (exeOutput.sink.setProp || exeOutput.sink.setProto))
-                        //  detectedSink.add(`${exeOutput.sink.setProto}-${exeOutput.sink.setProp}`);
-                        //       vectorMap.set(exploit, exeOutput.sink || null);
-                        // if (verbose) console.info(`${fn}(${input}) -> ${JSON.stringify(sinkV)}`);
-                        // if (sandbox) console.info(`<DETECTION>${JSON.stringify(detection)}</DETECTION>`);
+        // fnLoop: for (const fnObj of fnList) {
+        //   //const fn = fnObj.replace(/\.cjs|\.esm/, "");
+        //   //const fn = fnObj.replace(/\.\_m\_[^\_]+\_m\_/, "");
+        //   const fn = fnObj.replace(/\.\_m\_[^\_]+\_m\_/, "").replace(".prototype.constructor", "");
+        //   try {
+        //     for (const [testFile, inputList] of testCasesMap) {
+        //       const locatedFnOI = findCallOfInterest(inputList[2], inputList[1], pkgName, fn);
+        //       if (locatedFnOI.size === 0) continue;
+        //       //console.info(locatedFnOI)
+        //       // check if the there is a test input for the function in the inputList map. The key is the function name (e.g., 'pkgMainFunc'). It may also be 'pkgMainFunc.fn1.fn2'
+        //       if (locatedFnOI.has(fn)) {
+        //         console.info(`Processing function: ${fn}`);
+        //         const exploitCases = generateExploits(locatedFnOI.get(fn));
+        //         const exploitInputs = Array.from(
+        //           new Set(exploitCases.flatMap((inner) => inner.map(JSON.stringify)))
+        //         ).map(JSON.parse);
+        //         if (exploitCases.length > 0) {
+        //           //for (let exploitInputs of exploitCases) {
+        //           for (let exploitArgs of exploitInputs) {
+        //             //console.info(exploitArgs);
+        //             //console.info(`Executing function: ${fn} with inputs: ${exploitArgs}`);
+        //             // check of exploitArgs is identically equal to: exploitArgs===['e30=', 'IntcIl9fcHJvdG9fX1wiOntcInBvbGx1dGVkS2V5XCI6XCJwb2xsdXRlZFZhbHVlXCJ9fSI=']
+        //             // if (exploitArgs.length === 2 && exploitArgs[0] === 'e30=' && exploitArgs[1] === 'IntcIl9fcHJvdG9fX1wiOntcInBvbGx1dGVkS2V5XCI6XCJwb2xsdXRlZFZhbHVlXCJ9fSI=')
+        //             cleanUpProto(newObjectProto);
+        //             const exeOutput = fnExecute(
+        //               fn,
+        //               importedPkg,
+        //               exploitArgs,
+        //               { cleanUpProto, copyPrototypeChain, decodeStr, verify },
+        //               vmExec
+        //             );
+        //             //exeOutput = await forkExe(packagePath, fn, exploitArgs);
+        //             /*                                                     exeOutput = spawnSync('node',
+        //                      ['../${projPath}/fuzzUtils/execFn.js', fn, packagePath, JSON.stringify(exploitArgs)],
+        //                         { encoding: 'utf8', stdio: 'inherit' }); */
+        //             if (nameSpaceObj && nameSpaceObj.length > 0)
+        //               exeOutput = fnExecute(fn, nameSpaceObj, exploitArgs, globalObj, vmExec);
+        //             // restore the original prototype chain
+        //             cleanUpProto(newObjectProto);
+        //             if (exeOutput?.polluted) {
+        //               fnMap.set(pkgName, fn);
+        //               // const sink = new Map(
+        //               //   Array.from(exeOutput.sink).map(([key, value]) => {
+        //               //     return [
+        //               //       key,
+        //               //       value ? value.replace(`${pkg.pkgPath}/`, "").replace(`${funcPath}/`, "") : null,
+        //               //     ];
+        //               //   })
+        //               // );
+        //               const sink = Object.values(exeOutput.sink).join("") === "" ? "null" : exeOutput.sink;
+        //               const sink =
+        //                 Object.values(exeOutput.sink).join("") === ""
+        //                   ? "null"
+        //                   : Object.values(exeOutput.sink).join(",");
+        //               const detection = {
+        //                 entryPoint: fnObj,
+        //                 inputCase: exeOutput.args,
+        //                 sinkLocation: sink ?? null,
+        //                 polluted: exeOutput?.polluted,
+        //                 mode: "pairwise",
+        //                 testFile: testFile.replace(`${pkgPath}/node_modules/${pkg.package_name}`, ""),
+        //               };
+        //               const input = JSON.stringify(exeOutput.args);
+        //               const exploit = `${fn}#${input}`;
+        //               // add a map to store the detected sink locations, with the entry point as the key
+        //               //vectorMap.set(funcPath, exeOutput.sink);
+        //               if (pkg.options.multiVectors) {
+        //                 vectorMap.set(fn, sink);
+        //                 detectedSink.add(sink);
+        //                 detectionArray.push(detection);
+        //                 //} else if (!detectedSink.has(sink)) {
+        //                 if (verbose) console.log(`${fn}(${input}) -> ${JSON.stringify(sink)}`);
+        //                 if (sandbox) console.log(`<DETECTION>${JSON.stringify(detection)}</DETECTION>`);
+        //               } else if (vectorMap.get(fn) !== sink) {
+        //                 vectorMap.set(fn, sink);
+        //                 detectedSink.add(sink);
+        //                 detectionArray.push(detection);
+        //                 if (verbose) console.log(`${fn}(${input}) -> ${JSON.stringify(sink)}`);
+        //                 if (sandbox) console.log(`<DETECTION>${JSON.stringify(detection)}</DETECTION>`);
+        //               }
+        //               //if (exeOutput.sink && (exeOutput.sink.setProp || exeOutput.sink.setProto))
+        //               //  detectedSink.add(`${exeOutput.sink.setProto}-${exeOutput.sink.setProp}`);
+        //               //       vectorMap.set(exploit, exeOutput.sink || null);
+        //               // if (verbose) console.info(`${fn}(${input}) -> ${JSON.stringify(sink)}`);
+        //               // if (sandbox) console.info(`<DETECTION>${JSON.stringify(detection)}</DETECTION>`);
 
-                        //continue fnLoop;
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          } catch (error) {
-            console.error(error);
-          }
-        }
+        //               //continue fnLoop;
+        //             }
+        //           }
+        //           //}
+        //         }
+        //       }
+        //     }
+        //   } catch (error) {
+        //     console.error(error);
+        //   }
+        // }
       } catch (e) {
         console.error(e);
       }
@@ -372,6 +377,7 @@ function fnExecute(fnPath, context, args, aux, vmExec = false) {
   //let verbose = false;
   const { cleanUpProto, copyPrototypeChain, decodeStr, verify } = aux;
   const trackedProperty = "pollutedKey";
+  let sinkLine;
   var protoMonitor = { readProto: null, readProp: null, setProto: null, setProp: null };
   var monitorMap = new Map();
   let fn,
@@ -428,7 +434,9 @@ function fnExecute(fnPath, context, args, aux, vmExec = false) {
             const decodedArgs = decodeStr(argumentsList).map((arg) => (arg === "{}" ? someObj : arg));
             //argumentsList = argumentsList.map((arg) => (arg === "{}" ? someObj : arg));
             Reflect.apply(target, someObj, decodedArgs);
-          } catch (error) {}
+          } catch (error) {
+            //console.error(error.message);
+          }
         },
       });
     }
@@ -459,9 +467,20 @@ function fnExecute(fnPath, context, args, aux, vmExec = false) {
       //const result = new Function("fn", "args", "return fn(...args)")(fn, args);
       //const result = new Function("fn", "args", "return fn(args);")(fn, args);
     } else {
-      vmRun(trappedFunction, fn, args, someObj);
+      //vmRun_old(trappedFunction, fn, args, someObj);
+      sinkLine = vmRun(decodeStr, fn, args);
+      //sinkLine = vmRun(decodeStr, fnPath, args, context);
       //isolateRun(trappedFunction, fn, args);
     }
+    if (sinkLine)
+      return {
+        polluted: true,
+        sink: sinkLine || "null",
+        args: decodeStr(args).map((arg) => (arg === "{}" ? {} : arg)),
+        hash: args.join(","),
+        fnCode: fn,
+      };
+
     /*         if (protoMonitor.sink2) {
                     return protoMonitor;
                 } */
@@ -477,12 +496,13 @@ function fnExecute(fnPath, context, args, aux, vmExec = false) {
     //
     const activeChain = Object.getPrototypeOf(victim);
     const propKey = verify(clonedChain, activeChain);
-    // check if our property added in a different format or structure (e.g., under an object)
+    // // check if our property added in a different format or structure (e.g., under an object)
     if (propKey && propKey.includes(trackedProperty)) {
       return {
         polluted: true,
         sink: protoMonitor,
         args: decodeStr(args).map((arg) => (arg === "{}" ? someObj : arg)),
+        hash: args.join(","),
         fnCode: fn,
       };
     }
@@ -493,6 +513,7 @@ function fnExecute(fnPath, context, args, aux, vmExec = false) {
         polluted: "unknown",
         sink: protoMonitor,
         args: decodeStr(args).map((arg) => (arg === "{}" ? someObj : arg)),
+        hash: args.join(","),
         fnCode: fn,
       };
     }
@@ -502,6 +523,7 @@ function fnExecute(fnPath, context, args, aux, vmExec = false) {
         polluted: "local",
         sink: protoMonitor,
         args: decodeStr(args).map((arg) => (arg === "{}" ? someObj : arg)),
+        hash: args.join(","),
         fnCode: fn,
       };
     }
@@ -518,7 +540,72 @@ function fnExecute(fnPath, context, args, aux, vmExec = false) {
   }
 }
 
-function vmRun(proxyFunction, fn, inputCase, obj, action = "add", timeout = 100) {
+function vmRun(decodeStr, fn, inputCase, importedPkg, action = "add", timeout = 100000) {
+  const prop = "pollutedKey";
+  // Create a sandbox context for executing the function
+  const sandbox = {
+    fn, // the function to test
+    inputCase, // the input cases
+    decodeStr,
+    console,
+    Error,
+    //fnResolve,
+    //importedPkg,
+  };
+  let context, code, script;
+  try {
+    // Create a new VM context
+    context = vm.createContext(sandbox);
+    if (action === "del") context.__proto__.pollutedKey = "PP";
+
+    // Function to execute the test function in the sandbox
+    //code = `const result = inputCase.call(null, proxyFunction);`;
+    //code = ` proxyFunction(...inputCase); `
+    vm.runInContext(
+      `
+        'use strict';
+        Object.freeze(Object.prototype);
+      `,
+      context
+    );
+    const code = `
+    'use strict';
+    //const fn = fnResolve(fnPath, importedPkg);
+    const decodedArgs = decodeStr(inputCase).map((arg) => (arg === "{}" ? {} : arg));
+    Reflect.apply(${fn}, {}, decodedArgs);
+    //fn(...inputCase); 
+    `;
+
+    // Create and run the script with a timeout
+    try {
+      vm.runInContext(code, context, { timeout: timeout, filename: "poc.js" }); // This enforces the timeout
+    } catch (e) {
+      const stackLines = e.stack.split("\n");
+      const vmLine = stackLines[4].includes(`Cannot add property ${prop}, object is not extensible`);
+      if (vmLine) {
+        const sinkLine = stackLines[5].trim();
+        if (sinkLine.search(/(\d+):(\d+)/)) {
+          // const vulFn = sinkLine.match(/at\s([^\s]+)\s/)[1];
+          // const [path, line, column] = sinkLine.match(/\(([^\)]+)\)/)[1].split(":");
+          // console.log(`
+          //   Entry.Fn: ${fn.name}, Vuln.Fn: ${vulFn}, inputs: (${inputCase.join(",")})
+          //   at path: ${path}, line ${line}, column ${column}
+          // `);
+          return sinkLine;
+        }
+      }
+    }
+    /*         if (victim.pollutedKey && action !== 'del')
+                    return victim.pollutedKey; */
+    // The result is handled within the sandbox context
+  } catch (e) {
+    // Handle timeout or any other error
+    //console.error("Error in VM execution:", e.message);
+    //fs.appendFileSync(`logs/run_jbx_${pkgLogName}-vmRun${process.pid}.log`, e.message, { encoding: 'utf8' })
+  }
+}
+
+function vmRun_old(proxyFunction, fn, inputCase, obj, action = "add", timeout = 100) {
   // Create a sandbox context for executing the function
   const sandbox = {
     fn, // the function to test
@@ -692,123 +779,6 @@ function fnEnumSimple(lib, prefix, depth, globalNameObj = false) {
   recurse(lib, prefix, depth);
   return [...new Set(enumList)];
 }
-
-// function fnExecute1(fnPath, context, args) {
-//   const trackedProperty = "pollutedKey";
-//   var protoMonitor = { readProto: null, readProp: null, setProto: null, setProp: null };
-//   (empty = {}), (victim = {});
-//   try {
-//     /*         fnPath = fnPath.split('.')
-//                 fnPath.shift()
-//                 const fn = fnPath.reduce((obj, segment) => {
-//                     if (obj && obj[segment] !== undefined) {
-//                         return obj[segment];
-//                     }
-//                     throw new Error(`Path segment "${segment}" does not exist.`);
-//                 }, context); // Split path by '.'
-
-//                 // Ensure the resolved value is a function
-//                 if (typeof fn !== 'function') {
-//                     throw new Error(`Resolved path "${fnPath}" is not a function.`);
-//                 } */
-
-//     const resolvedFn = resolveFunction(fnPath, context);
-
-//     Object.setPrototypeOf(
-//       empty,
-//       new Proxy(Object.prototype, {
-//         get(obj, prop, receiver) {
-//           if (prop === "__proto__") {
-//             //throw new Error(`Access to property ${trackedProperty} detected`);
-//             //throw new Error('accessed');
-//             const error = new Error();
-//             const stackLines = error.stack.split("\n");
-//             //protoMonitor.protoType = true;
-//             protoMonitor.readProto = stackLines[2].trim();
-//           } else if (prop === trackedProperty) {
-//             //throw new Error(`Access to property ${trackedProperty} detected`);
-//             //throw new Error('accessed');
-//             const error = new Error();
-//             const stackLines = error.stack.split("\n");
-//             //protoMonitor.protoType = true;
-//             protoMonitor.readProp = stackLines[2].trim();
-//           }
-//           return Reflect.get(obj, prop, receiver);
-//         },
-//         set(obj, prop, value, receiver) {
-//           if (prop === "__proto__") {
-//             //throw new Error(`Access to property ${trackedProperty} detected`);
-//             //throw new Error('accessed');
-//             const error = new Error();
-//             const stackLines = error.stack.split("\n");
-//             //protoMonitor.protoType = true;
-//             protoMonitor.setProto = stackLines[2].trim();
-//           } else if (prop === trackedProperty) {
-//             //throw new Error(`Modification of property ${trackedProperty} detected`);
-//             //throw new Error('modify');
-//             //protoMonitor.pollutedProp = true;
-//             const error = new Error();
-//             const stackLines = error.stack.split("\n");
-//             protoMonitor.setProp = stackLines[2].trim();
-//           }
-//           return Reflect.set(obj, prop, value, receiver);
-//         },
-//     );
-//     //empty = proxingObj({})
-//     // Create a proxy to wrap the target function
-//     /*         const proxyFunction = new Proxy(fn, {
-//                     apply: function (target, thisArg, argumentsList) {
-//                         //console.info('Intercepted function call');
-//                         return Reflect.apply(target, empty, argumentsList);
-//                         //return target.call(empty, argumentsList[0])
-//                     }
-//                 }); */
-//     function withPropertyTrap(targetFunction) {
-//       return new Proxy(targetFunction, {
-//         apply(target, thisArg, argumentsList) {
-//           try {
-//             // Execute the target function with `emptyProxy` as the context
-//             Reflect.apply(target, empty, argumentsList);
-//           } catch (error) {}
-//         },
-//       });
-//     }
-//     const trappedFunction = withPropertyTrap(resolvedFn);
-//     const clonedChain = copyPrototypeChain(victim);
-
-//     if (!verbose) {
-//       //            Reflect.apply(null, trappedFunction);
-//       try {
-//         //args = Object.values(args).map(decodeStr);
-//       } catch (error) {}
-//       //proxyFunction(...args);
-//       args.call(null, trappedFunction);
-//     } else vmRun(trappedFunction, resolvedFn, args);
-//     /*         if (protoMonitor.sink2) {
-//                     return protoMonitor;
-//                 } */
-//     if (pollutionFinder(victim, trackedProperty, true)) {
-//       //Reflect.deleteProperty(Object.prototype, trackedProperty)
-//       return { polluted: true, sink: protoMonitor, fnCode: resolvedFn };
-//     }
-//     const activeChain = Object.getPrototypeOf(victim);
-//     const propKey = verify(clonedChain, activeChain);
-//     if (propKey) return { polluted: true, sink: protoMonitor, fnCode: resolvedFn };
-//     //verify()
-
-//     // Second round: check property Deletion
-//     //victim = {};
-
-//     // vmRun(trappedFunction, resolvedFn, args, "del");
-//     // if (pollutionFinder(victim, trackedProperty, true)) {
-//     //   //Reflect.deleteProperty(Object.prototype, trackedProperty)
-//     //   return { polluted: true, sink: protoMonitor, fnCode: resolvedFn };
-//     // } else Reflect.deleteProperty(Object.prototype, "pollutedKey");
-//   } catch (e) {
-//     //console.info(`logs/run_jbx_${pkgLogName}-${process.pid}.log: `, e)
-//     //fs.appendFileSync(`logs/run_jbx_${pkgLogName}-fixFuzzy-${process.pid}.log`, e.message, { encoding: 'utf8' })
-//   }
-// }
 
 /**
  * Searches for a property in the prototype chain of an object.
@@ -1122,7 +1092,7 @@ async function loadPackage1(pkgName) {
 async function loadPackage2(pkgDir) {
   const path = await import("path");
   const { readFile } = await import("fs/promises");
-  const { createRequire } = await import("module");
+  //const { createRequire } = await import("module");
   const fs = await import("fs");
 
   let results = {};
@@ -1152,7 +1122,7 @@ async function loadPackage2(pkgDir) {
       if (fs.existsSync(fullPath) && !parsedModule.has(fullPath) && !excludeSet.has(fullPath.split(".").pop())) {
         results[`_m_${uniqueKey}_m_`] =
           //key === "cjs" || key === "js" ? require(fullPath) : await import(fullPath).catch(() => null);
-          await importModule3(fullPath).catch(() => ({}));
+          await importModule3(fullPath, require).catch(() => ({}));
         parsedModule.add(fullPath);
       }
     };
@@ -1211,8 +1181,8 @@ async function loadPackage2(pkgDir) {
     }
 
     // Handle edge cases: direct require calls
-    if (Object.keys(results).length === 0 || Object.keys(results)[1] === undefined) {
-      results = await importModule3(pkgName).catch(() => ({}));
+    if (Object.keys(results).length === 0 || Object.keys(results)[0] === undefined) {
+      results = await importModule3(pkgMainPath, require).catch(() => ({}));
     }
   } catch (err) {
     console.error(`Error loading ${pkgName}:`, err.message);
@@ -1337,21 +1307,28 @@ async function loadPackage4(pkgName, importModule) {
   }
 }
 
-async function importModule3(moduleName) {
-  const { createRequire } = await import("module");
-  const originalDir = process.cwd();
-  const originalNodePath = process.env.NODE_PATH || "";
-  process.chdir(pkgPath);
-  const originalPath = originalNodePath ? path.delimiter + originalNodePath : "";
-  process.env.NODE_PATH = path.resolve(pkgPath, "node_modules") + originalPath;
-  const require = createRequire(import.meta.url); // Enable require in ESM
-  require("module").Module._initPaths();
+async function importModule3(moduleName, require) {
+  // const { createRequire } = await import("module");
+  // const originalDir = process.cwd();
+  // const originalNodePath = process.env.NODE_PATH || "";
+  // process.chdir(pkgPath);
+  // const originalPath = originalNodePath ? path.delimiter + originalNodePath : "";
+  // process.env.NODE_PATH = path.resolve(pkgPath, "node_modules") + originalPath;
+  // //const require = createRequire(import.meta.url); // Enable require in ESM
+  // //const require = createRequire(moduleName);
+  // //pkgMainPath = require.resolve(moduleName); // Resolve package main file
+  // require("module").Module._initPaths();
   try {
     return require(moduleName);
   } catch (e) {
     console.log("Trying dynamic import..");
     try {
-      return await import(moduleName);
+      // If require fails, attempt a dynamic import
+      const modulePath = require.resolve(moduleName);
+      const moduleUrl = pathToFileURL(modulePath).href;
+      const importedModule = await import(moduleUrl);
+      return importedModule.default || importedModule;
+      //return await import(moduleName);
     } catch (e) {
       console.log("Trying files import..");
       try {
@@ -1391,7 +1368,7 @@ async function importModule3(moduleName) {
       }
     }
   } finally {
-    process.chdir(originalDir);
-    process.env.NODE_PATH = originalNodePath; // Restore original NODE_PATH
+    //process.chdir(originalDir);
+    //process.env.NODE_PATH = originalNodePath; // Restore original NODE_PATH
   }
 }
