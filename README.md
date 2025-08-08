@@ -1,4 +1,4 @@
-# Bullseye - Automated Package Analysis
+# Bullseye - Automated Prototype Pollution Analysis and PoC generator
 
 This project provides a script, [`run.js`](run.js), for automated prototype pollution vulnerability analysis of npm packages. It supports running tools in various modes, including Docker sandboxing and Node.js VM contexts, and can process large datasets in parallel.
 
