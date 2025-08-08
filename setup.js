@@ -80,53 +80,12 @@ let allTimestamp = Date.now();
 //const cache = fs.readFileSync('../npm_45k_loc.txt', { encoding: 'utf8' })
 let i = 0;
 const currentPath = process.cwd();
-const projDir = "/home/tariq/bulleyes2";
+const projDir = "/home/tariq/bullseye";
 let inputPath = null;
-// const benchPath = "/data/benchmark/zd-155";
-//const benchPath = "/home/tariq/benchmark/benchmark-zd";
-// inputPath = "/home/tariq/bulleyes/raw-data/compare/zd123/pkgsWithSink.txt";
-// const benchPath = "/home/benchmark/npm47k";
-// inputPath = "/home/tariq/bulleyes/dataset/cached47k_nov18.json";
-// const benchPath = "/home/tariq/benchmark/zd-357";
-//const benchPath = "/home/tariq/benchmark/benchmark-zd";
-// inputPath = "/home/tariq/bulleyes/dataset/excel357.txt";
-// const benchPath = "/home/tariq/benchmark/arteau-15";
-// inputPath = "/home/tariq/bulleyes/dataset/arteau15.txt";
-//inputPath = "/home/tariq/bulleyes/dataset/ZD-470.json";
-//const benchPath = "/data/benchmark/excelDS/";
-//const inputPath = "/home/tariq/bulleyes/dataset/excelDataset.txt";
-//const inputPath = "/home/tariq/bulleyes/raw-data/totalzd/zd526.txt";
-//const benchPath = "/data/benchmark/odgen19";
-//inputPath = "/home/tariq/bulleyes/dataset/odgen19-sinks.json";
-//  const benchPath = "/data/benchmark/zhou-65";
-//  inputPath = "/home/tariq/bulleyes/dataset/zhoe-cve.json";
+
 const benchPath = "/home/benchmark/npm47k_Jul21";
-inputPath = "/home/tariq/bulleyes2/dataset/hd_pkgs.txt";
-//const benchPath = "/data/benchmark/benchmark-zhou-291";
-//const benchPath = "/home/tariq/benchmark/benchmark-fuzzproto";
-// const benchPath = "/home/tariq/benchmark/ss-100_latest";
-//const inputPath = "/home/tariq/bulleyes/dataset/historic_zhou.txt.json";
-// inputPath = "/home/tariq/bulleyes/dataset/ss-100_zd.json";
-// const benchPath = "/home/tariq/benchmark/zd306-allvers";
-// const benchPath = "/home/tariq/benchmark/zd306-allvers";
-// inputPath = "/home/tariq/bulleyes2/dataset/myp44649+34.json";
-// const benchPath = "/home/benchmark/cveLatest";
-// const benchPath = "/home/benchmark/npm5k_Jul21";
-// inputPath = "/home/tariq/bulleyes2/dataset/ld_pkgs.txt";
-// inputPath = "/home/tariq/bulleyes2/dataset/npm34.json";
-// inputPath = "/home/tariq/bulleyes2/dataset/cveLatest.txt";
-// inputPath = "/home/tariq/bulleyes2/raw-data/totalzd/pkgs_json306_allVers.txt";
-// inputPath = "/home/tariq/bulleyes2/dataset/allvers_reinstall.txt";
-//const inputPath = "/home/tariq/bulleyes/dataset/totalZeroDay_nov5_18_zd95.json";
-//const inputPath = "/home/tariq/bulleyes/dataset/cached47k_nov18.json";
-//const inputPath = "/home/tariq/fuzzproto/dataset/results/realworld/report_45k_Nov05_proxy.json";
-//const inputPath = "/home/tariq/bulleyes/raw-data/fuzzproto.cached47k_nov18.json.2025-02-28_20-41-09.tmp.json";
-//const benchPath = "/data/benchmark/scored-48";
-// const benchPath = "/data/benchmark/manar";
-//inputPath = "/home/tariq/bulleyes2/dataset/CriticalHighMed.txt";
-// inputPath = "/home/tariq/bulleyes2/benchmark/manar/manar26.txt";
-// const benchPath = "/home/tariq/benchmark/ai";
-// inputPath = "/home/tariq/bulleyes2/dataset/ai.txt";
+inputPath = "/home/tariq/bullseye/dataset/hd_pkgs.txt";
+
 const input = argv.input ? argv.input : inputPath !== null ? inputPath : null;
 
 if (input)
@@ -142,17 +101,6 @@ if (input)
   } else {
     dataset = [input];
   }
-else {
-  // console.log("Please provide an input file");
-  // process.exit();
-  dataset = [
-    {
-      package_name: "ag_grid_enterprise",
-      version: "31.3.2",
-      pkgPath: "/data/benchmark/benchmark-zd/ag_grid_enterprise-31.3.2",
-    },
-  ];
-}
 // name the file with the date of the run (eg. fuzzproto_2021-09-01_12-00-00.json)
 const logText = new Date().toISOString().replace(/:/g, "-").replace(/T/g, "_").split(".")[0];
 const suffix = `${input ? input.replace(/.*\/([^\/]+)$/, "$1") : "default"}.${logText}`;
@@ -255,60 +203,43 @@ async function processQueue() {
             //fs.appendFileSync(outputFile, pkg.package_name + logText + ",\n");
             process.chdir(fullPath);
             try {
-              //some packages like @abip/sp-common cannot installed properly with --legacy-peer-deps
-              // execPromise(
-              //   `npm init -y && npm install ${pkgName}@${version} --legacy-peer-deps && npm install ${pkgName}@${version}`,
-              //   {
-              //     stdio: "pipe",
-              //     encoding: "utf-8",
-              //   }
-              // );
-              // execSync(
-              //   `npm init -y && npm install ${pkgName}@${version} --legacy-peer-deps && npm install ${pkgName}@${version}`,
-              //   {
-              //     stdio: "pipe",
-              //     encoding: "utf-8",
-              //   }
-              // );
+              // 1- first, uncomment this branch to install the package with npm init
+              execPromise(
+                `npm init -y && npm install ${pkgName}@${version} --legacy-peer-deps && npm install ${pkgName}@${version}`,
+                {
+                  stdio: "pipe",
+                  encoding: "utf-8",
+                }
+              );
+
             } catch (error) { }
             //process.chdir(currentPath);
             //pkgObj.pkgPath = path.resolve(`./`);
             // Fetch metadata
           }
-          try {
-            if (!repoDir || (fs.existsSync(repoDir) && fs.readdirSync(repoDir).length === 0)) {
-              repoDir = await fetchMetadata(pkgObj, fullPath); // pkg: { package_name, version, pkgLink, pkgPath }
-              console.log(`Fetched metadata for ${pkgName}`);
-            }
-          } catch (error) {
-            console.error(`Failed to fetch metadata for ${pkgName}: ${error.message}`);
-            fs.appendFileSync(
-              path.resolve(`${currentPath}/../logs/createBenchmarkDir.log`),
-              pkgName + ": " + error.message + "\n"
-            );
-          }
+          // 2- then, Comment the previous one, and uncomment this branch to fetch metadata if the folder is empty. 
+          // try {
+          //   if (!repoDir || (fs.existsSync(repoDir) && fs.readdirSync(repoDir).length === 0)) {
+          //     repoDir = await fetchMetadata(pkgObj, fullPath); // pkg: { package_name, version, pkgLink, pkgPath }
+          //     console.log(`Fetched metadata for ${pkgName}`);
+          //   }
+          // } catch (error) {
+          //   console.error(`Failed to fetch metadata for ${pkgName}: ${error.message}`);
+          //   fs.appendFileSync(
+          //     path.resolve(`${currentPath}/../logs/createBenchmarkDir.log`),
+          //     pkgName + ": " + error.message + "\n"
+          //   );
+          // }
         }
       }
     })
   );
   await Promise.all(tasks);
-  //read tempFile, fix [] (add [ at the beginning of the file, and replace , with ] at the end), refine the results, and write to outputFile
-  // if (fs.existsSync(tempFile)) {
-  //   const tempData = fs.readFileSync(tempFile, { encoding: "utf8" });
-  //   const tempResults = JSON.parse(tempData.replace(/,\n$/, "]").replace(/^\{/, "[{\n"));
-  //   const refinedRes = await refineReport(tempResults);
-  //   fs.writeFileSync(outputFile, refinedRes, "utf8");
-  // }
-  console.log("All packages processed!");
-  // var lib = await import("/home/tariq/bulleyes/p-limit/index.js"); // Install via npm if needed
-  // const pLimit = lib.default;
-  // const limit = pLimit(5); // Adjust concurrency level
-  process.chdir(currentPath);
-  // for (let pkg of dataset) {
-  //   //const promises = dataset.map((pkg) => {
-  //   //});
 
-  // }
+  console.log("All packages processed!");
+
+  process.chdir(currentPath);
+
 })()
   .catch((e) => {
     console.error(e);
@@ -480,42 +411,6 @@ async function refineReport(pkgReports) {
       }
     }
   });
-  // let advisories;
-  // try {
-  //   console.log("Searching for relevant CVEs ...");
-  //   advisories = await githubRequest(`/advisories?ecosystem=npm&affects=${pkgInfo.package_name}`);
-  // } catch (e) {
-  //   console.log("error fetching from github advisory database. ", e);
-  // }
-  // try {
-  //   if (advisories.length > 0) {
-  //     //versionReport.prevReports = advisories.map(a => a.cve_id);
-  //     //let jbxReports = pkgInfo.reports && pkgInfo.reports.length > 0 ? pkgInfo.reports : null;
-  //     if (pkgInfo.results.length > 0)
-  //       for (const reportVer of pkgInfo.results) {
-  //         const entryPoint = reportVer.entryPoint.match(/\.?([a-zA-Z-_0-9]*)$/)[1];
-  //         for (const advisory of advisories) {
-  //           // array of all texts surrounded by ``
-  //           const advDesc = advisory.description.match(/`([^`]*)`/g)?.map((match) => match.slice(1, -1));
-  //           const CVE = advisory.cve_id || advisory.ghsa_id;
-  //           //if (advisory.length > 0) {
-  //           //advisory.forEach(vuln => {
-  //           // check if the function is mentioned in the advisory
-  //           if (
-  //             advisory.vulnerabilities[0].package.name === pkgInfo.package_name ||
-  //             (advDesc && advDesc.some((extracted) => extracted.includes(entryPoint)))
-  //           ) {
-  //             //pkgInfo[verNo].reports[reportNo].duplicates.push(pkgInfo.cveId);
-  //             if (!Reflect.has(reportVer, "matchedCVE")) reportVer.matchedCVE = [];
-  //             reportVer.matchedCVE.push(CVE);
-  //             //console.log(`${reportFunc.func_path} has a match in ${advisory.ghsa_id}`)
-  //           }
-  //           //});
-  //         }
-  //       }
-  //   }
-  // } catch (e) {
-  //   console.log("error while processing advisories: ", e.message);
-  // }
+
   return refinedRes;
 }

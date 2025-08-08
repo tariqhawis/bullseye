@@ -9,3 +9,5 @@ benchmark
 paper
 scripts
 *.bak
+ASTwarnings.txt
+fuzzUtils/.creds.json

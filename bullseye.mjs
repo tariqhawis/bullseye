@@ -12,8 +12,8 @@ var parsedObject = [];
 var victim = {};
 var someObj = {};
 
-const projPath = "/home/tariq/bulleyes2"; // host path
-// const projPath = "/usr/src/app"; // docker path
+// const projPath = "/home/tariq/bulldeye"; // enable this for troubleshooting
+const projPath = "/usr/src/app"; // docker path
 const fixedCases = JSON.parse(fs.readFileSync(`${projPath}/fuzzPaterns.json`, "utf-8"));
 let pkg = {};
 
@@ -26,18 +26,6 @@ if (process.argv[2]) {
     package_name: "assign-deep", // import issue
     version: "1.0.0",
     pkgPath: "/data/benchmark/ss-100/assign_deep-1.0.0",
-    // package_name: "mout", // timeout issue
-    // version: "2.0.0-alpha.1",
-    // pkgPath: "/data/benchmark/ss-100/mout-2.0.0-alpha.1",
-    // package_name: "node-forge",
-    // version: "0.9.0",
-    // pkgPath: "/data/benchmark/ss-100/node_forge-0.9.0",
-    // package_name: "@rpldy/uploader",
-    // version: "1.8.1",
-    // pkgPath: "/home/benchmark/npm47k/rpldy_uploader-1.8.1",
-    // package_name: "@tensorflow/tfjs",
-    // version: "4.22.0",
-    // pkgPath: "/home/tariq/benchmark/random/tensorflow_tfjs-4.22.0",
     options: {
       verbose: true,
       sandbox: false,

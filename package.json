@@ -1,5 +1,5 @@
 {
-  "name": "bulleyes",
+  "name": "bullseye",
   "description": "static and dynamic security scanning tool that detect prototype pollution and ReDoS in npm packages",
   "version": "1.0.0",
   "main": "ss-benchmark.js",
@@ -20,9 +20,9 @@
   "author": "tariqhawis",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/tariqhawis/bulleyes/issues"
+    "url": "https://github.com/tariqhawis/bullseye/issues"
   },
-  "homepage": "https://github.com/tariqhawis/bulleyes#readme",
+  "homepage": "https://github.com/tariqhawis/bullseye#readme",
   "dependencies": {
     "acorn": "^8.11.3",
     "acorn-loose": "^8.4.0",
