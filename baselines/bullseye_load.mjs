@@ -29,15 +29,15 @@ if (process.argv[2]) {
     // package_name: "mout", // timeout issue
     // version: "2.0.0-alpha.1",
     // pkgPath: "/data/benchmark/ss-100/mout-2.0.0-alpha.1",
-    // package_name: "node-forge",
-    // version: "0.9.0",
-    // pkgPath: "/data/benchmark/ss-100/node_forge-0.9.0",
+    package_name: "node-forge",
+    version: "0.9.0",
+    pkgPath: "/data/benchmark/ss-100/node_forge-0.9.0",
     // package_name: "@rpldy/uploader",
     // version: "1.8.1",
     // pkgPath: "/home/benchmark/npm47k/rpldy_uploader-1.8.1",
-    package_name: "@react-awesome-query-builder/ui",
-    version: "6.6.4-alpha.0",
-    pkgPath: "/home/benchmark/npm47k/react_awesome_query_builder_ui-6.6.4-alpha.0",
+    // package_name: "@tensorflow/tfjs",
+    // version: "4.22.0",
+    // pkgPath: "/home/tariq/benchmark/random/tensorflow_tfjs-4.22.0",
     options: {
       verbose: true,
       sandbox: false,
@@ -80,16 +80,16 @@ let pkgTimestamp = Date.now();
   let detectionArray = [];
   let detectedSink = new Set();
   //const { fuzzGenerator } = require('./utils.js')
-  //const { generateTestInputs } = require(`${projPath}/fuzzUtils/pairwise.js");
-  //const { extractInputsFromTestSuites } = require(`${projPath}/fuzzUtils/AnalyzeTestSuites.js");
-  const { importGlobalNameSpace, importModule, findTestFiles } = await import(`${projPath}/fuzzUtils/packageInit.js`);
-  const { generateExploits } = await import(`${projPath}/fuzzUtils/exploitGenerator.js`);
-  const { analyzeTestCase, findCallOfInterest } = await import(`${projPath}/fuzzUtils/testInputExtraction.js`);
+  //const { generateTestInputs } = require(`${projPath}/pairwise.js");
+  //const { extractInputsFromTestSuites } = require(`${projPath}/AnalyzeTestSuites.js");
+  const { importGlobalNameSpace, importModule, findTestFiles } = await import(`${projPath}/packageInit.js`);
+  const { generateExploits } = await import(`${projPath}/exploitGenerator.js`);
+  const { analyzeTestCase, findCallOfInterest } = await import(`${projPath}/testInputExtraction.js`);
   const { fnEnumerate, cleanUpProto, copyPrototypeChain, decodeStr, verify } = await import(
-    `${projPath}/fuzzUtils/functionHandler.js`
+    `${projPath}/functionHandler.js`
   );
   //const ivm = vmExec ? await import("isolated-vm") : false;
-  //const { importModule } = require("/home/tariq/bulleyes/fuzzUtils/packageInit.js");
+  //const { importModule } = require("/home/tariq/bulleyes/packageInit.js");
 
   try {
     // const originalDir = process.cwd();
@@ -101,8 +101,10 @@ let pkgTimestamp = Date.now();
                     loc = JSON.parse(fs.readFileSync('./cloc.txt', { encoding: 'utf8' })).SUM['code']; */
     //    [importedPkg, importType] = await importModule2(pkgName);
     //importedPkg = await importModule(`${pkg.pkgPath}/node_modules/${pkg.package_name}`);
-    importedPkg = await loadPackage2(`${pkgPath}/node_modules/${pkg.package_name}`);
-    // importedPkg = requireLib(`${pkgPath}/node_modules/${pkg.package_name}`);
+    // importedPkg = await loadPackage2(`${pkgPath}/node_modules/${pkg.package_name}`);
+    const results = requireLib(`${pkgPath}/node_modules/${pkg.package_name}`);
+    importedPkg = results.importedPkg;
+    detectionArray.modulePaths = results.modulePaths.length;
     //importedPkg = await import(`${pkg.pkgPath}/node_modules/${pkg.package_name}/index.js`);
     // importedPkg2 = await importGlobalNameSpace(`${pkg.pkgPath}/node_modules/${pkg.package_name}`);
     //let path = importType === "require" ? pkgName : importType === "import" ? `${pkgName}.default` : null;
@@ -248,7 +250,7 @@ let pkgTimestamp = Date.now();
                     );
                     //exeOutput = await forkExe(packagePath, fn, exploitArgs);
                     /*                                                     exeOutput = spawnSync('node',
-                             ['../${projPath}/fuzzUtils/execFn.js', fn, packagePath, JSON.stringify(exploitArgs)],
+                             ['../${projPath}/execFn.js', fn, packagePath, JSON.stringify(exploitArgs)],
                                 { encoding: 'utf8', stdio: 'inherit' }); */
                     if (nameSpaceObj && nameSpaceObj.length > 0)
                       exeOutput = fnExecute(fn, nameSpaceObj, exploitArgs, globalObj, vmExec);
@@ -340,8 +342,8 @@ let pkgTimestamp = Date.now();
     //const testFiles = findTestFiles(pkgName, repo, argv[3])
     //if (verbose) console.info(JSON.stringify(results, null, 2));
     if (!sandbox) console.log(`<JSON-OUTPUT>${JSON.stringify(results)}</JSON-OUTPUT>`);
-        console.log(`<STATS>${JSON.stringify({fnCount: results.fnCount, modulePaths:results.modulePaths})}</STATS>`);
-
+    //console.log(`<STATS>${JSON.stringify(results.fnCount)}</STATS>`);
+    console.log(`<STATS>${JSON.stringify({ fnCount: results.fnCount, modulePaths: results.modulePaths })}</STATS>`);
   })
   .catch((e) => {
     console.error(e);
@@ -453,7 +455,7 @@ function fnExecute(fnPath, context, args, aux, vmExec = false) {
       });
     }
     const trappedFunction = withPropertyTrap(fn);
-    // const clonedChain = copyPrototypeChain(victim);
+    const clonedChain = copyPrototypeChain(victim);
     try {
       //args = args.map(decodeStr);
       //console.info(JSON.stringify(args));
@@ -495,10 +497,10 @@ function fnExecute(fnPath, context, args, aux, vmExec = false) {
     //   };
     // }
     //
-    // const activeChain = Object.getPrototypeOf(victim);
-    // const propKey = verify(clonedChain, activeChain);
+    const activeChain = Object.getPrototypeOf(victim);
+    const propKey = verify(clonedChain, activeChain);
     // check if our property added in a different format or structure (e.g., under an object)
-    if (victim.pollutedKey === "123" || victim.pollutedKey === 123) {
+    if (propKey && propKey.includes(trackedProperty)) {
       return {
         polluted: true,
         sink: protoMonitor,
@@ -506,33 +508,25 @@ function fnExecute(fnPath, context, args, aux, vmExec = false) {
         fnCode: fn,
       };
     }
-    // if (propKey && propKey.includes(trackedProperty)) {
-    //   return {
-    //     polluted: true,
-    //     sink: protoMonitor,
-    //     args: decodeStr(args).map((arg) => (arg === "{}" ? {} : arg)),
-    //     fnCode: fn,
-    //   };
-    // }
-    // // Check if the prototype chain has been modified "this needs manually validatation to the generated exploit"
-    // else if (unknownSideEffect && (propKey || pollutionFinder(victim, trackedProperty, true))) {
-    //   //Reflect.deleteProperty(Object.prototype, trackedProperty)
-    //   return {
-    //     polluted: "unknown",
-    //     sink: protoMonitor,
-    //     args: decodeStr(args).map((arg) => (arg === "{}" ? someObj : arg)),
-    //     fnCode: fn,
-    //   };
-    // }
-    // // check if setProp is modified. If neither of above are not triggered, this often means local change to the target (not prototype pollution)
-    // else if (protoMonitor.setProp && unknownSideEffect) {
-    //   return {
-    //     polluted: "local",
-    //     sink: protoMonitor,
-    //     args: decodeStr(args).map((arg) => (arg === "{}" ? someObj : arg)),
-    //     fnCode: fn,
-    //   };
-    // }
+    // Check if the prototype chain has been modified "this needs manually validatation to the generated exploit"
+    else if (unknownSideEffect && (propKey || pollutionFinder(victim, trackedProperty, true))) {
+      //Reflect.deleteProperty(Object.prototype, trackedProperty)
+      return {
+        polluted: "unknown",
+        sink: protoMonitor,
+        args: decodeStr(args).map((arg) => (arg === "{}" ? someObj : arg)),
+        fnCode: fn,
+      };
+    }
+    // check if setProp is modified. If neither of above are not triggered, this often means local change to the target (not prototype pollution)
+    else if (protoMonitor.setProp && unknownSideEffect) {
+      return {
+        polluted: "local",
+        sink: protoMonitor,
+        args: decodeStr(args).map((arg) => (arg === "{}" ? someObj : arg)),
+        fnCode: fn,
+      };
+    }
     // Second round: check property Deletion
     // victim = {};
     // vmRun(trappedFunction, fn, args, "del");
@@ -1109,7 +1103,7 @@ async function loadPackage(pkgName, importModule, globalObj = false) {
 
 // Function to load all module versions (CJS & ESM), no require()() support
 async function loadPackage1(pkgName) {
-  //const { importGlobalNameSpace, importModule } = await import(`${projPath}/fuzzUtils/packageInit.js`);
+  //const { importGlobalNameSpace, importModule } = await import(`${projPath}/packageInit.js`);
   const path = await import("path");
   const { readFile } = await import("fs/promises");
   const { createRequire } = await import("module");
@@ -1321,7 +1315,7 @@ function requireLib(pkgDir) {
   } catch (err) {
     console.warn(`Error loading ${pkgName}:`, err.message);
   }
-  return results;
+  return { importedPkg: results, modulePaths: [pkgMainPath] };
 }
 
 async function importModule3(moduleName, require) {

@@ -10,23 +10,6 @@ const datetime = function () {
 };
 
 function createAdvisory1(vulnPkg) {
-  //pkg:
-  /*[
-    {
-      package_name: "package_name",
-      version: "version",
-      type: "proto",
-      count: #,
-      results: [
-        package_name.func (...)",
-      ],
-      time: {
-        install_timer: ss,
-        scan_timer: ss,
-        total: ss,
-      },
-    },
-  ]*/
   // Gist template
   const gistTemplate = `
 **Vulnerability type:**
@@ -193,9 +176,8 @@ After Attack:  {"pollutedKey":123}
   return allGists;
 }
 
-async function githubRequest1(query, method = "GET", API = "token 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") {
+async function githubRequest1(query, method = "GET", API) {
   const { Octokit } = await import("octokit");
-  //const API = 'token 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' //kluban's
   //const octokit = new Octokit({});
   const octokit = new Octokit({
     auth: API,
@@ -247,7 +229,7 @@ async function githubRequest1(query, method = "GET", API = "token ghp_oDZnjOh1ww
   }
 }
 
-async function githubRequest(query, method = "GET", API = "token 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") {
+async function githubRequest(query, method = "GET", API) {
   const { Octokit } = await import("octokit");
   //const octokit = new Octokit({});
   const octokit = new Octokit({

@@ -6,8 +6,6 @@ const fs = require("fs");
 const { glob } = require("glob");
 const { createHash } = require("crypto");
 const hash = (str) => createHash("sha256").update(str).digest("hex");
-//const { required } = require("yargs");
-//const { extractInputsFromTestSuites } = require("../fuzzUtils/AnalyzeTestSuites");
 
 // Helper function to append warning line in a text file. If the warning line is already recorded, it will not be added again.
 function recordWarning(warning) {
@@ -126,13 +124,6 @@ function analyzeTestCase(code) {
         case "ArrowFunctionExpression":
           //evaluate the body of the arrow function after using escodegen to convert it to a string
           return eval(escodegen.generate(nodeBody));
-        // for Function calls at the right side of the assignment, we need to evaluate the function call and return the value
-        /*case "CallExpression":
-                //return eval(`${callee}(${arguments.join(", ")})`);
-                             case "FunctionExpression":
-                                return eval(`(${parseNode.source()})`);
-                            case "ArrowFunctionExpression":
-                                return eval(`(${parseNode.source()})`); */
 
         // For Logical and Arithmetic expressions, evaluate the left and right sides
         case "LogicalExpression":
@@ -201,14 +192,8 @@ function analyzeTestCase(code) {
         if (specifier.local && specifier.local.name) {
           id = parseNode(specifier.local, "name");
           pkgImports.set("#REQ#" + id, moduleName);
-          //const parsedSpec = parseNode(specifier);
-          //varNames.push(specifier.local.name);
         }
       });
-
-      /*       varNames.forEach((varName) => {
-        currentScope().set(varName, moduleName);
-      }); */
     },
 
     VariableDeclaration(node, ancestors) {
@@ -341,8 +326,6 @@ function analyzeTestCase(code) {
       // process CallExpression if the callee is not require
       let calleeName;
       try {
-        //if (!ancestors.some((a) => a.type === 'VariableDeclarator' || 1)) {
-        //if (node.callee.name === 'require') {
         const current = currentScope();
         // if the last ancestor is a VariableDeclarator, resolve the callee
 
@@ -357,11 +340,7 @@ function analyzeTestCase(code) {
           typeof calleeName === "string" && calleeName.includes(".") && current.has(calleeName.split(".")[0])
             ? current.get(calleeName.split(".")[0]).calleeName + calleeName.substring(calleeName.indexOf("."))
             : calleeName;
-        //const args = node.arguments.map(arg => parseNode(arg));
-        //const value = parseNode(node);
-        // if test suite function called with our function as an argument (e.g., assert.deepEqual(assign(one, two),...), record our function and its arguments
-        // if args is an object
-        //if (!testSuiteFunctions.includes(calleeName)) {
+
         if (node.arguments[0]?.type === "CallExpression" && node.arguments[0]?.callee?.name !== "require") {
           const nestedCalleeName = parseNode(node.arguments[0].callee, "name");
           const nestedArgs = node.arguments[0].arguments.map((arg) => parseNode(arg));
@@ -374,11 +353,7 @@ function analyzeTestCase(code) {
           // if the function not one of the testSuiteFunctions while match a KEY in pkgImports, record the function and its arguments as fnOfInterest
           const frags =
             typeof calleeName === "string" && calleeName.includes(".") ? calleeName.split(".") : [calleeName];
-          if (
-            node.arguments.length > 0 &&
-            !nativeFn.some((nf) => nf.includes(frags[frags.length - 1]))
-            //&& (pkgImports.has("#REQ#" + frags[0]) || frags[0] === calleeName)
-          ) {
+          if (node.arguments.length > 0 && !nativeFn.some((nf) => nf.includes(frags[frags.length - 1]))) {
             // add the function as key and its arguments as value to fnOfInterest
             // if the function already exists, add the arguments to the existing value
             const existingArgs = fnOfInterest.has("#Call#" + calleeName) ? fnOfInterest.get("#Call#" + calleeName) : [];
@@ -394,125 +369,12 @@ function analyzeTestCase(code) {
             }
           }
         }
-        // if simply the function of intereset equal to the package name (wheter the first part of the whole name)
-
-        // Only record calls for functions within test suite context
-        // const callee = node.callee;
-        // if (callee.type === "Identifier" && callee.name === 'it' || callee.name === 'describe') {
-        //     const args = node.arguments.map((arg) => parseNode(arg, ancestors));
-        //     console.log(`Test suite function called: ${callee.name}, Arguments:`, args);
-        // }
       } catch (error) {
         // console.error(error.message, escodegen.generate(node));
       }
-      // if the callee is a function call, record the function name and its arguments
-      /*                     else if (typeof callee === 'object') {
-                                    current.set(callee.calleeName, { calleeName: callee.calleeName, args: callee.args });
-                                }
-                                // if the callee is a variable, resolve the variable and record the value
-                                else {
-                                    current.set(callee, value);
-                                } */
     },
-    /*         ExpressionStatement(node, ancestors) {
-                    const expression = node.expression;
-        
-                    // Handle test suite function calls (describe, it, etc.)
-                    if (
-                        expression.type === "CallExpression" &&
-                        expression.callee.type === "Identifier" &&
-                        testSuiteFunctions.includes(expression.callee.name)
-                    ) {
-                        const calleeName = expression.callee.name;
-                        const args = expression.arguments.map(arg => parseNode(arg, ancestors));
-                        console.log(`Resolved Test Suite Function: ${calleeName}, Arguments:`, args);
-                    }
-        
-                    // Handle assertion library function calls
-                    else if (
-                        expression.type === "CallExpression" &&
-                        (expression.callee.type === "Identifier" || expression.callee.type === "MemberExpression")
-                    ) {
-                        const calleeName =
-                            expression.callee.type === "Identifier"
-                                ? expression.callee.name
-                                : `${parseNode(expression.callee.object, ancestors)}.${expression.callee.property.name}`;
-                        const args = expression.arguments.map(arg => parseNode(arg, ancestors));
-                        console.log(`Resolved Assertion: ${calleeName}, Arguments:`, args);
-                    }
-                }, */
   });
   return [globalScope, pkgImports, fnOfInterest];
-}
-
-// main: run analyzeTestCase for each test suite case. First separate the code into test suite cases, then run analyzeTestCase for each case
-function main(code) {
-  // walk through ast of the code and extract each test case. Merge the file's header to each test case
-  const testCases = [];
-  const ast = acorn.parse(code, { ecmaVersion: "latest", sourceType: "module" });
-  let startFirstTestSuite = 0;
-  let start = 0;
-  const suites = [];
-  let headerEnd = 0;
-
-  ast.body.forEach((node) => {
-    if (node.type === "ExpressionStatement" && node.expression.callee && node.expression.callee.name === "describe") {
-      suites.push({
-        start: node.start,
-        end: node.end,
-      });
-
-      if (headerEnd === 0) {
-        headerEnd = node.start;
-      }
-    }
-  });
-
-  const header = code.substring(0, headerEnd);
-  const suiteBlocks = suites.map((suite) => code.substring(suite.start, suite.end));
-
-  //return { header, suites: suiteBlocks };
-
-  /*    walk.ancestor(ast, {
-           CallExpression(node) {
-               // startFirstTestSuite is the start of the first test suite
-               if (node.callee.name === 'describe' && startFirstTestSuite === 0) {
-                   startFirstTestSuite = node.start;
-               }
-               else if (node.callee.name === 'describe') {
-                   start = node.start;
-               }
-               else if (node.callee.name === 'it') {
-                   const end = node.arguments[1].end;
-                   testCases.push(code.substring(node.start, node.end));
-                   // start = 0; // Reset start after each describe block
-               }
-           }
-       }); */
-  // analyze each test case
-  // const resolvedMap = new Map();
-  // const pkgImports = new Map();
-  // First, analyze the code to extract global scope variables and required packages, excluding the test cases
-  //const [globalScope, required] = analyzeTestCase(code.substring(0, startFirstTestSuite));
-  // Merge the global scope variables
-  // globalScope.forEach((value, key) => {
-  //     resolvedMap.set(key, value);
-  // });
-  const requiredPkgs = analyzeTestCase(header);
-  let allCases = [];
-  suiteBlocks.forEach((testCase) => {
-    const [globalScope, required] = analyzeTestCase(testCase);
-    // Merge the global scope variables
-    // globalScope.forEach((value, key) => {
-    //     resolvedMap.set(key, value);
-    // });
-    // // Merge the required packages
-    // required.forEach((value, key) => {
-    //     pkgImports.set(key, value);
-    // });
-    allCases.push(globalScope);
-  });
-  return [allCases, requiredPkgs];
 }
 
 function getByValue(map, searchValue) {
@@ -584,27 +446,11 @@ function findCallOfInterest(enumCases, pkgImports, pkg, fn) {
           const firstPartFn = fn.includes(".") ? fn.split(".")[0] : fn;
           const lastPartFn = fn.includes(".") ? fn.split(".").pop() : fn;
           // if the calleeName is in the pkgImports and the path is in the includePaths
-          // if (
-          //   firstPartKey === reqKey.substring(5) &&
-          //   (includePaths.some((inc) => reqVal.substring(5).startsWith(inc) || reqVal === inc) ||
-          //     reqKeySearch === pkgSearch ||
-          //     cKey)
-          //   //pathMatching(reqVal.substring(5) || reqVal)
-          // ) {
-          //   // replace the first part of the key with the package name
-          //   const newKey = cKey.substring(6).replace(firstPartKey, "pkgMainFunc");
-          //   if (newKey === fn || firstPartKey === fn.split(".").pop()) {
-          //     callsOfInterest.set(fn, cVal);
-          //     //break casesLoop;
-          //   }
-          // }
-          //if (/*firstPartKey === reqKey.substring(5) &&*/ !callsOfInterest.has(fn))
+
           const searchByFn = enumCases.has(`#Call#${fn.replace("pkgMainFunc", firstPartKey)}`)
             ? enumCases.get(`#Call#${fn.replace("pkgMainFunc", firstPartKey)}`)
             : undefined;
-          // const searchByFn = fn.includes(".")
-          //   ? enumCases.get(`#Call#${fn.replace("pkgMainFunc", firstPartKey)}`)
-          //   : undefined;
+
           if (searchByFn) {
             callsOfInterest.set(fn, searchByFn);
             break casesLoop;
@@ -621,14 +467,6 @@ function findCallOfInterest(enumCases, pkgImports, pkg, fn) {
               includePaths.some((inc) => reqVal.substring(5).startsWith(inc) && fn.includes(".")) &&
               lastPartFn === lastPartKey)
           ) {
-            // replace the first part of the key with the package name
-            //const newKey = cKey.substring(6).replace(firstPartKey, "pkgMainFunc");
-            //if (newKey === fn || firstPartKey === fn.split(".").pop()) {
-            // if the function already exists, add the values to the existing value
-            //if (callsOfInterest.has(fn)) callsOfInterest.set(fn, [...callsOfInterest.get(fn), cVal]);
-            //else
-            // if the callsOfInterest has the fn, and the values are less than 5, add the new value to the existing value
-            //if (callsOfInterest.has(fn) && callsOfInterest.get(fn).length < 5) callsOfInterest.set(fn, cVal);
             callsOfInterest.set(fn, cVal);
             break casesLoop;
             // }
@@ -636,36 +474,6 @@ function findCallOfInterest(enumCases, pkgImports, pkg, fn) {
         }
       }
     }
-    // If not linked with req, match by the name
-    // e.g the function's equal to the package name, or the last part of the function name is equal to the package name or its last part
-    // casesLoop2: for (const [cKey, cVal] of enumCases) {
-    //   // check if we have a function call and the calleeName is in the pkgImports
-    //   if (cKey && cKey.startsWith("#Call#")) {
-    //     // For calls other than require, take basename of the calleeName if it is a path, e.g., assign.deep
-    //     // take basename of the calleeName if it is a path, e.g., assign.deep
-    //     const firstPartKey = cKey.includes(".") ? cKey.substring(6).split(".")[0] : cKey.substring(6);
-    //     const lastPartKey = cKey.includes(".") ? cKey.substring(6).split(".").pop() : cKey.substring(6);
-    //     const firstPartFn = fn.includes(".") ? fn.split(".")[0] : fn;
-    //     const lastPartFn = fn.includes(".") ? fn.split(".").pop() : fn;
-    //     const pkgSearch = pkg.replace(/[^a-zA-Z]/g, "").toLowerCase();
-    //     // if the calleeName is in the pkgImports and the path is in the includePaths
-    //     if (
-    //       firstPartKey.toLowerCase() === pkgSearch ||
-    //       lastPartKey === pkgSearch ||
-    //       firstPartKey === firstPartFn ||
-    //       lastPartKey === lastPartFn
-    //     ) {
-    //       // replace the first part of the key with the package name
-    //       //const newKey = cKey.substring(6).replace(firstPartKey, "pkgMainFunc");
-    //       //if (newKey === fn || firstPartKey === fn.split(".").pop()) {
-    //       callsOfInterest.set(fn, cVal);
-    //       // if the function already exists, add the arguments to the existing value
-    //       call
-    //       //break casesLoop2;
-    //       // }
-    //     }
-    //   }
-    // }
   } catch (error) {
     //console.log(error);
   }
@@ -673,9 +481,9 @@ function findCallOfInterest(enumCases, pkgImports, pkg, fn) {
   return callsOfInterest;
 }
 
+// direct troublshooting
 // const code = fs.readFileSync(
-//   //"/home/tariq/benchmark/benchmark-ss/controlled_merge_lib/node_modules/controlled-merge/test/tests.js",
-//   "/home/tariq/benchmark/arteau-15/assign_deep-0.4.6/repo-assign_deep/test.js",
+//   //"/home/benchmark/controlled_merge_lib/node_modules/controlled-merge/test/tests.js",
 //   "utf8"
 // );
 // const [enumCases, pkgImports, fnOfInterest] = analyzeTestCase(code);

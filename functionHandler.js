@@ -420,84 +420,6 @@ function pollutionFinder(obj, property, del = false) {
   } catch (error) {}
 }
 
-function fnEnumerate(lib, prefix, depth, globalNameObj = false) {
-  let quiet = true;
-  const enumList = [];
-  function processProperty(fName, lib, prefix, depth) {
-    if (depth == 0) return;
-    if (fName == "abort" || fName == "__proto__" || +fName == fName || fName == "Skipped-Function") return;
-    const comp = lib[fName];
-    // Handle the property as a function or object
-    // Check if the property is an object to continue exploring
-    if (typeof comp === "object" && comp !== null) {
-      recurse(comp, `${prefix}.${fName}`, depth - 1);
-    } else if (typeof comp === "function") {
-      // Check if the function is a class, in this case, scan each method.
-      if (isClass(comp)) {
-        if (!quiet) console.log(` [+] Class ${fName}`);
-        const classMethods = comp.prototype;
-        //console.log(` [-] Class ${prefix}.${fName}...`);
-        try {
-          for (const method of Reflect.ownKeys(classMethods)) {
-            if (typeof classMethods[method] === "function") {
-              const fnPath = `${prefix}.${fName}.${method}`;
-              if (!quiet) console.log(`   [-] Method ${method}`);
-              enumList.push(fnPath);
-            }
-          }
-        } catch (error) {}
-      } else {
-        if (!quiet) console.log(` [-] Function ${fName}`);
-        const fnPath = `${prefix}.${fName}`;
-        enumList.push(fnPath);
-      }
-    }
-  }
-  function loopFn(lib, prefix, depth) {
-    for (const fName of Reflect.ownKeys(lib)) {
-      processProperty(fName, lib, prefix, depth);
-    }
-    for (const fName in lib) processProperty(fName, lib, prefix, depth);
-  }
-  function recurse(lib, prefix, depth) {
-    if (!quiet) console.log(`[+] Component ${prefix}`);
-    // if lib has the same name as the previous object, return
-    if (lib.name === prefix.split(".").pop()) return;
-    // If depth limit reached or object already explored, return
-    if (depth == 0) return;
-    /*         if (parsedObject.indexOf(lib) !== -1)
-                    return; */
-
-    // Mark the object as explored
-    //parsedObject.push(lib);
-
-    // Iterate over fName enrties of the object
-    try {
-      if (typeof lib === "function" && lib !== null) {
-        let fnPath = lib.name !== "" && lib.name !== null && lib.name !== undefined ? `${prefix}.${lib.name}` : prefix;
-        enumList.push(fnPath);
-        // for a case when a function has nested functions, and are not in prototype, enumerate them
-        if (Reflect.ownKeys(lib).length > 0 && lib.prototype !== undefined)
-          if (Reflect.ownKeys(lib.prototype).length > 1) recurse(lib.prototype, `${prefix}.prototype`, depth - 1);
-          else loopFn(lib, `${prefix}`, depth - 1);
-      }
-      // if globalNameObj is true, then the object is a global object, enumerate objectNameSpace's properties
-      if (globalNameObj && Array.isArray(lib))
-        for (const globalSObj of lib) {
-          recurse(global[globalSObj], `${globalSObj}`, depth - 1);
-        }
-      // Enumerate imported namespace properties
-      else loopFn(lib, prefix, depth - 1);
-      //for (const fName of Reflect.ownKeys(lib)) {
-    } catch (error) {}
-  }
-  if (typeof lib === "function") {
-    enumList.push("pkgMainFunc");
-  }
-  recurse(lib, prefix, depth);
-  return [...new Set(enumList)];
-}
-
 function cleanUpProto(cleanedCopy) {
   const currentProto = Object.prototype;
 
@@ -563,7 +485,6 @@ function cleanUpProto(cleanedCopy) {
 }
 
 module.exports = {
-  fnEnumerate,
   fnExecute,
   fnResolve,
   pollutionFinder,

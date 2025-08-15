@@ -41,7 +41,7 @@ if (process.argv[2]) {
     //     package_name: "infusion",
     // version: "4.7.1",
     // pkgPath: "/home/benchmark/npm47k/infusion-4.7.1",
-        package_name: "@feizheng/next-js-core2",
+    package_name: "@feizheng/next-js-core2",
     version: "2.6.0",
     pkgPath: "/home/benchmark/npm5k/feizheng_next_js_core2-2.6.0",
     options: {
@@ -86,16 +86,16 @@ let pkgTimestamp = Date.now();
   let detectionArray = [];
   let detectedSink = new Set();
   //const { fuzzGenerator } = require('./utils.js')
-  //const { generateTestInputs } = require(`${projPath}/fuzzUtils/pairwise.js");
-  //const { extractInputsFromTestSuites } = require(`${projPath}/fuzzUtils/AnalyzeTestSuites.js");
-  const { importGlobalNameSpace, importModule, findTestFiles } = await import(`${projPath}/fuzzUtils/packageInit.js`);
-  const { generateExploits } = await import(`${projPath}/fuzzUtils/exploitGenerator.js`);
-  const { analyzeTestCase, findCallOfInterest } = await import(`${projPath}/fuzzUtils/testInputExtraction.js`);
+  //const { generateTestInputs } = require(`${projPath}/pairwise.js");
+  //const { extractInputsFromTestSuites } = require(`${projPath}/AnalyzeTestSuites.js");
+  const { importGlobalNameSpace, importModule, findTestFiles } = await import(`${projPath}/packageInit.js`);
+  const { generateExploits } = await import(`${projPath}/exploitGenerator.js`);
+  const { analyzeTestCase, findCallOfInterest } = await import(`${projPath}/testInputExtraction.js`);
   const { fnEnumerate, cleanUpProto, copyPrototypeChain, decodeStr, verify } = await import(
-    `${projPath}/fuzzUtils/functionHandler.js`
+    `${projPath}/functionHandler.js`
   );
   //const ivm = vmExec ? await import("isolated-vm") : false;
-  //const { importModule } = require("/home/tariq/bulleyes/fuzzUtils/packageInit.js");
+  //const { importModule } = require("/home/tariq/bulleyes/packageInit.js");
 
   try {
     // const originalDir = process.cwd();
@@ -256,7 +256,7 @@ let pkgTimestamp = Date.now();
     //                 );
     //                 //exeOutput = await forkExe(packagePath, fn, exploitArgs);
     //                 /*                                                     exeOutput = spawnSync('node',
-    //                          ['../${projPath}/fuzzUtils/execFn.js', fn, packagePath, JSON.stringify(exploitArgs)],
+    //                          ['../${projPath}/execFn.js', fn, packagePath, JSON.stringify(exploitArgs)],
     //                             { encoding: 'utf8', stdio: 'inherit' }); */
     //                 if (nameSpaceObj && nameSpaceObj.length > 0)
     //                   exeOutput = fnExecute(fn, nameSpaceObj, exploitArgs, globalObj, vmExec);
@@ -995,7 +995,7 @@ function fnEnumerate2(lib, prefix, depth, globalNameObj = false) {
         for (const subProp of Reflect.ownKeys(prop)) {
           if (typeof prop[subProp] === "function") {
             enumSet.add(`${propPath}.${subProp}`);
-          } 
+          }
           // else if (typeof prop[subProp] === "object" && prop !== null) {
           //   recurse(prop, propPath, depth - 1);
           // }
@@ -1246,7 +1246,7 @@ async function loadPackage(pkgDir) {
 
 // Function to load all module versions (CJS & ESM), no require()() support
 // async function loadPackage1(pkgName) {
-//   //const { importGlobalNameSpace, importModule } = await import(`${projPath}/fuzzUtils/packageInit.js`);
+//   //const { importGlobalNameSpace, importModule } = await import(`${projPath}/packageInit.js`);
 //   const path = await import("path");
 //   const { readFile } = await import("fs/promises");
 //   const { createRequire } = await import("module");
@@ -1449,7 +1449,7 @@ async function loadPackage(pkgDir) {
 
 // Function to load all module versions (CJS & ESM, ES2015), no require()() support
 // async function loadPackage3(pkgName) {
-//   //const { importGlobalNameSpace, importModule } = await import(`${projPath}/fuzzUtils/packageInit.js`);
+//   //const { importGlobalNameSpace, importModule } = await import(`${projPath}/packageInit.js`);
 //   const path = await import("path");
 //   const { readFile } = await import("fs/promises");
 //   const { createRequire } = await import("module");

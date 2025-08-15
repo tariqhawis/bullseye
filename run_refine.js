@@ -3,12 +3,10 @@ const fs = require("fs");
 const { execSync, spawnSync, spawn, exec } = require("child_process");
 const yargs = require("yargs");
 const Docker = require("dockerode");
-//const { npmInit } = require("../utils/dataUtils.js");
+const APIKEY = "token ghp_oDZnjOh1ww5Xrm4UKQBEAXXFs6feCe1h1SSS"; // Replace with your actual GitHub API token
 const path = require("path");
 const glob = require("glob");
 const process = require("process");
-//const { fetchMetadata } = require("../fuzzUtils/packageInit.js");
-const { githubRequest } = require("/home/tariq/fuzzproto/utils/dataUtils.js");
 const lib = require("p-limit");
 const { promisify } = require("util");
 const appendFile = promisify(fs.appendFile);
@@ -91,11 +89,11 @@ let allTimestamp = Date.now();
 //const cache = fs.readFileSync('../npm_45k_loc.txt', { encoding: 'utf8' })
 let i = 0;
 const currentPath = process.cwd();
-const projDir = "/home/tariq/bulleyes2";
+const projDir = "/home/tariq/bullseye";
 let inputPath = null;
 
 const benchPath = "/home/benchmark/npm5k";
-inputPath = "/home/tariq/bulleyes2/dataset/npm6588.json";
+inputPath = "/home/tariq/bullseye/dataset/npm6588.json";
 
 const input = argv.input ? argv.input : inputPath !== null ? inputPath : null;
 
@@ -125,10 +123,10 @@ else {
 const logText = new Date().toISOString().replace(/:/g, "-").replace(/T/g, "_").split(".")[0];
 const suffix = `${input ? input.replace(/.*\/([^\/]+)$/, "$1") : "default"}.${logText}`;
 
-const dirPath = "benchmark/bulleyes";
+const dirPath = "benchmark/bullseye";
 const outputFile = `${projDir}/${dirPath}/${argv.tool.replace(/.*\/([^\/]+)$/, "$1")}.${suffix}.json`;
 const tempFile = `${projDir}/${dirPath}/${argv.tool.replace(/.*\/([^\/]+)$/, "$1")}.${suffix}.txt`;
-const logFile = "/home/tariq/bulleyes2/logs/" + suffix + ".log";
+const logFile = "/home/tariq/bullseye/logs/" + suffix + ".log";
 const pLimit = lib.default;
 const limit = pLimit(argv.parallel || 1); // Adjust concurrency level
 
@@ -162,7 +160,7 @@ async function processQueue(file) {
 (async () => {
   let counter = 0;
   let pkgList = [];
-  
+
   try {
     let refineInput = argv.refineInput ? argv.refineInput : tempFile;
     if (fs.existsSync(refineInput)) {
@@ -174,7 +172,6 @@ async function processQueue(file) {
   } catch (error) {
     console.log(error);
   }
-
 })()
   .catch((e) => {
     console.error(e);
@@ -199,7 +196,7 @@ async function sandboxRun(pkg, pkgLib, timeout = 120000) {
   let container;
   try {
     container = await docker.createContainer({
-      Image: "bulleyes:latest",
+      Image: "bullseye:latest",
       //Cmd: [`ls`, `-la`, `/usr/src/app/`],
       Cmd: [
         "/bin/bash",
@@ -512,11 +509,11 @@ async function refineReport(pkgReports) {
         }
       }
   }
-  
+
   return refinedRes;
 }
 
-async function githubRequest1(query, method = "GET", API = "token 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") {
+async function githubRequest(query, method = "GET", API = APIKEY) {
   try {
     const { Octokit } = await import("octokit");
     //const octokit = new Octokit({});

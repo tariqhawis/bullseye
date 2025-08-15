@@ -80,16 +80,16 @@ let pkgTimestamp = Date.now();
   let detectionArray = [];
   let detectedSink = new Set();
   //const { fuzzGenerator } = require('./utils.js')
-  //const { generateTestInputs } = require(`${projPath}/fuzzUtils/pairwise.js");
-  //const { extractInputsFromTestSuites } = require(`${projPath}/fuzzUtils/AnalyzeTestSuites.js");
-  const { importGlobalNameSpace, importModule, findTestFiles } = await import(`${projPath}/fuzzUtils/packageInit.js`);
-  const { generateExploits } = await import(`${projPath}/fuzzUtils/exploitGenerator.js`);
-  const { analyzeTestCase, findCallOfInterest } = await import(`${projPath}/fuzzUtils/testInputExtraction.js`);
+  //const { generateTestInputs } = require(`${projPath}/pairwise.js");
+  //const { extractInputsFromTestSuites } = require(`${projPath}/AnalyzeTestSuites.js");
+  const { importGlobalNameSpace, importModule, findTestFiles } = await import(`${projPath}/packageInit.js`);
+  const { generateExploits } = await import(`${projPath}/exploitGenerator.js`);
+  const { analyzeTestCase, findCallOfInterest } = await import(`${projPath}/testInputExtraction.js`);
   const { fnEnumerate, cleanUpProto, copyPrototypeChain, decodeStr, verify } = await import(
-    `${projPath}/fuzzUtils/functionHandler.js`
+    `${projPath}/functionHandler.js`
   );
   //const ivm = vmExec ? await import("isolated-vm") : false;
-  //const { importModule } = require("/home/tariq/bulleyes/fuzzUtils/packageInit.js");
+  //const { importModule } = require("/home/tariq/bulleyes/packageInit.js");
 
   try {
     // const originalDir = process.cwd();
@@ -250,7 +250,7 @@ let pkgTimestamp = Date.now();
     //                 );
     //                 //exeOutput = await forkExe(packagePath, fn, exploitArgs);
     //                 /*                                                     exeOutput = spawnSync('node',
-    //                          ['../${projPath}/fuzzUtils/execFn.js', fn, packagePath, JSON.stringify(exploitArgs)],
+    //                          ['../${projPath}/execFn.js', fn, packagePath, JSON.stringify(exploitArgs)],
     //                             { encoding: 'utf8', stdio: 'inherit' }); */
     //                 if (nameSpaceObj && nameSpaceObj.length > 0)
     //                   exeOutput = fnExecute(fn, nameSpaceObj, exploitArgs, globalObj, vmExec);
@@ -343,8 +343,7 @@ let pkgTimestamp = Date.now();
     //if (verbose) console.info(JSON.stringify(results, null, 2));
     if (!sandbox) console.log(`<JSON-OUTPUT>${JSON.stringify(results)}</JSON-OUTPUT>`);
     //console.log(`<STATS>${JSON.stringify(results.fnCount)}</STATS>`);
-    console.log(`<STATS>${JSON.stringify({fnCount: results.fnCount, modulePaths:results.modulePaths})}</STATS>`);
-
+    console.log(`<STATS>${JSON.stringify({ fnCount: results.fnCount, modulePaths: results.modulePaths })}</STATS>`);
   })
   .catch((e) => {
     console.error(e);
@@ -1104,7 +1103,7 @@ async function loadPackage(pkgName, importModule, globalObj = false) {
 
 // Function to load all module versions (CJS & ESM), no require()() support
 async function loadPackage1(pkgName) {
-  //const { importGlobalNameSpace, importModule } = await import(`${projPath}/fuzzUtils/packageInit.js`);
+  //const { importGlobalNameSpace, importModule } = await import(`${projPath}/packageInit.js`);
   const path = await import("path");
   const { readFile } = await import("fs/promises");
   const { createRequire } = await import("module");
@@ -1316,7 +1315,7 @@ function requireLib(pkgDir) {
   } catch (err) {
     console.warn(`Error loading ${pkgName}:`, err.message);
   }
-  return {importedPkg:results, modulePaths:[pkgMainPath]};
+  return { importedPkg: results, modulePaths: [pkgMainPath] };
 }
 
 async function importModule3(moduleName, require) {

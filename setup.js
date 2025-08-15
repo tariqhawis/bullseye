@@ -3,12 +3,10 @@ const fs = require("fs");
 const { execSync, spawnSync, spawn, exec } = require("child_process");
 const yargs = require("yargs");
 const Docker = require("dockerode");
-//const { npmInit } = require("../utils/dataUtils.js");
+const APIKEY = "token ghp_oDZnjOh1ww5Xrm4UKQBEAXXFs6feCe1h1SSS"; // Replace with your actual GitHub API token
 const path = require("path");
 const glob = require("glob");
 const process = require("process");
-//const { fetchMetadata } = require("../fuzzUtils/packageInit.js");
-//const { githubRequest } = require("./fuzzUtils/githubApi.js");
 const lib = require("p-limit");
 const { promisify } = require("util");
 const appendFile = promisify(fs.appendFile);
@@ -20,9 +18,8 @@ const argv = yargs
       "JSON file containing the list of packages (e.g., {package_name, version}) or a single package (e.g., package_name@version)",
     type: "string",
   })
-    .option("npmPath", {
-    describe:
-      "NPM package installation path, e.g., /home/benchmark",
+  .option("npmPath", {
+    describe: "NPM package installation path, e.g., /home/benchmark",
     type: "string",
   })
   .option("tool", {
@@ -40,7 +37,7 @@ const argv = yargs
     type: "boolean",
     default: false,
   })
-    .option("latest", {
+  .option("latest", {
     describe: "rsetup the lastest version of the package from npm registry",
     type: "boolean",
     default: false,
@@ -88,7 +85,7 @@ const currentPath = process.cwd();
 const projDir = "/home/tariq/bullseye";
 let inputPath = null;
 
-const benchPath = argv.npmPath;// "/home/benchmark/npm47k_Jul21";
+const benchPath = argv.npmPath; // "/home/benchmark/npm47k_Jul21";
 //inputPath = "/home/tariq/bullseye/dataset/hd_pkgs.txt";
 
 const input = argv.input ? argv.input : inputPath !== null ? inputPath : null;
@@ -161,9 +158,9 @@ async function processQueue() {
         [, pkgName, version] = pkg.match(/^(@?[^@]+)@?(.*)/);
       }
       if (argv.latest) {
-      const response = await fetch(`https://registry.npmjs.org/${pkgName}`);
-      pkgMeta = await response.json();
-      version = pkgMeta.versions[pkgMeta["dist-tags"].latest].version;
+        const response = await fetch(`https://registry.npmjs.org/${pkgName}`);
+        pkgMeta = await response.json();
+        version = pkgMeta.versions[pkgMeta["dist-tags"].latest].version;
       }
       const pkgLib =
         pkgName
@@ -216,13 +213,12 @@ async function processQueue() {
                   encoding: "utf-8",
                 }
               );
-
-            } catch (error) { }
+            } catch (error) {}
             //process.chdir(currentPath);
             //pkgObj.pkgPath = path.resolve(`./`);
             // Fetch metadata
           }
-          // 2- then, Comment the previous one, and uncomment this branch to fetch metadata if the folder is empty. 
+          // 2- then, Comment the previous one, and uncomment this branch to fetch metadata if the folder is empty.
           // try {
           //   if (!repoDir || (fs.existsSync(repoDir) && fs.readdirSync(repoDir).length === 0)) {
           //     repoDir = await fetchMetadata(pkgObj, fullPath); // pkg: { package_name, version, pkgLink, pkgPath }
@@ -244,7 +240,6 @@ async function processQueue() {
   console.log("All packages processed!");
 
   process.chdir(currentPath);
-
 })()
   .catch((e) => {
     console.error(e);
@@ -253,7 +248,8 @@ async function processQueue() {
     const time = calcTime(allTimestamp, true);
     let intervalSec = Math.round((Date.now() - allTimestamp) / 1000);
     console.info(
-      `Finish the analysis ${Math.round((intervalSec / 60 / 60) * 10) / 10
+      `Finish the analysis ${
+        Math.round((intervalSec / 60 / 60) * 10) / 10
       } hrs (${intervalSec} sec) at ${new Date().toLocaleString()}`
     );
     process.exit(0);
@@ -418,4 +414,61 @@ async function refineReport(pkgReports) {
   });
 
   return refinedRes;
+}
+
+async function githubRequest(query, method = "GET", API = APIKEY) {
+  try {
+    const { Octokit } = await import("octokit");
+    //const octokit = new Octokit({});
+    const octokit = new Octokit({
+      auth: API,
+    });
+    switch (method) {
+      case "GET":
+        const nextPattern = /(?<=<)([\S]*)(?=>; rel="Next")/i;
+        let pagesRemaining = true;
+        let data = [];
+
+        while (pagesRemaining) {
+          const response = await octokit.request(`GET ${query}`, {
+            per_page: 100,
+            headers: {
+              "X-GitHub-Api-Version": "2022-11-28",
+            },
+          });
+
+          const parsedData = parseData(response.data); // parseData need to be imported
+          data = [...data, ...parsedData];
+
+          const linkHeader = response.headers.link;
+
+          pagesRemaining = linkHeader && linkHeader.includes(`rel=\"next\"`);
+
+          if (pagesRemaining) {
+            query = linkHeader.match(nextPattern)[0];
+          }
+        }
+        return data;
+
+      case "POST":
+        //const [fileName, processedContent] = createAdvisory(query.content)
+        const fileName = `Advisory_${query.pkg.replace("/", "-")}.md`;
+        const desc = `Advisory for ${query.pkg}`;
+
+        return await octokit.request("POST /gists", {
+          description: desc,
+          public: false,
+          files: {
+            [fileName]: {
+              content: query.content,
+            },
+          },
+          headers: {
+            "X-GitHub-Api-Version": "2022-11-28",
+          },
+        });
+    }
+  } catch (error) {
+    throw error;
+  }
 }
