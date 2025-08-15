@@ -1,7 +1,0 @@
-child_process.exec
-child_process.execFile
-child_process.fork
-child_process.spawn
-child_process.execSync
-child_process.execFileSync
-child_process.spawnSync

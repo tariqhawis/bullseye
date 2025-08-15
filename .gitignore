@@ -10,4 +10,4 @@ paper
 scripts
 *.bak
 ASTwarnings.txt
-fuzzUtils/*
+fuzzUtils/
