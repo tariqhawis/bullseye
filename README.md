@@ -1,20 +1,21 @@
-# Bullseye - Automated Prototype Pollution Analysis and PoC generator
+# Implementation of NDSS'26 accepted paper "Bullseye: Detecting Prototype Pollution in NPM Packages with Proof of Concept Exploits"
 
-This project provides a script, [`run.js`](run.js), for automated prototype pollution vulnerability analysis of npm packages. It supports running tools in various modes, including Docker sandboxing and Node.js VM contexts, and can process large datasets in parallel.
+Bullseye is a fully-automated dynamic analysis tool, written in JavaScript, for detecting prototype pollution vulnerabilities in Node.js (NPM) packages. It is designed for large-scale analysis, capable of scanning over 50,000 packages in less than 8 hours. The tool leverages JavaScript reflection methods, the Node.js native virtual machine, and runtime observation oracles, in conjunction with a package’s own test suites and predefined payload seeds, to detect true positive vulnerabilities. Each confirmed finding is supported with a generated proof-of-concept exploit, ensuring accuracy and practical verification.
 
 ## Reference
 
 This repository contains the implementation prototype of the approach described in our accepted paper at NDSS 2026. If you use this code, please cite our NDSS'26 paper.
 
-## Bullseye Directory Tree
+## Directory Tree
 
 ```bash
 .
 ├── benchmark  // The benchmark scripts and result artifacts
 │   ├── bullseye.vs.ablation
-│   └── bullseye.vs.baselines
+│   ├── bullseye.vs.baselines
+│   └── Dataset
 ├── bullseye.mjs // The actual analysis file run each time a package is invoked in the sandbox for the analysis
-├── Dockerfile
+├── Dockerfile // use this file to build bullseye image
 ├── functionHandler.js   // utilities for handling functions enumeration
 ├── exploitGenerator.js  // generation the exploit candidates
 ├── testInputExtraction.js
