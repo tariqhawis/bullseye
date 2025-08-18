@@ -1,0 +1,522 @@
+[
+    {
+        "_id": {
+            "$oid": "66391912e60df25b9554f582"
+        },
+        "version": "0.16.0",
+        "package_name": "consolidate",
+        "cve": ""
+    },
+    {
+        "_id": {
+            "$oid": "66391913e60df25b9554f6bb"
+        },
+        "version": "0.9.9",
+        "package_name": "whet.extend",
+        "cve": ""
+    },
+    {
+        "_id": {
+            "$oid": "66391914e60df25b9554f7e9"
+        },
+        "version": "0.4.1",
+        "package_name": "safe-eval",
+        "cve": "CVE-2022-25904"
+    },
+    {
+        "_id": {
+            "$oid": "66391915e60df25b9554f946"
+        },
+        "package_name": "flatnest",
+        "version": "1.0.0",
+        "cve": "CVE-2023-26135"
+    },
+    {
+        "_id": {
+            "$oid": "66391916e60df25b9554faff"
+        },
+        "version": "0.2.12",
+        "package_name": "burrito",
+        "cve": ""
+    },
+    {
+        "_id": {
+            "$oid": "66391917e60df25b9554fcbc"
+        },
+        "version": "0.1.2",
+        "package_name": "js-module-formats",
+        "cve": ""
+    },
+    {
+        "_id": {
+            "$oid": "66391918e60df25b9554fe50"
+        },
+        "version": "6.7.11",
+        "package_name": "collection.js",
+        "cve": "CVE-2023-26113"
+    },
+    {
+        "_id": {
+            "$oid": "66391937e60df25b95552364"
+        },
+        "package_name": "blear.utils.object",
+        "version": "1.0.15",
+        "cve": ""
+    },
+    {
+        "_id": {
+            "$oid": "66391941e60df25b95552f7e"
+        },
+        "version": "3.0.12",
+        "package_name": "iotdb",
+        "cve": ""
+    },
+    {
+        "_id": {
+            "$oid": "66391947e60df25b9555362f"
+        },
+        "version": "1.0.1",
+        "package_name": "aimee-extend",
+        "cve": ""
+    },
+    {
+        "_id": {
+            "$oid": "66391949e60df25b955538a2"
+        },
+        "version": "1.3.1",
+        "package_name": "rangy",
+        "cve": "CVE-2023-26102"
+    },
+    {
+        "_id": {
+            "$oid": "6639194ae60df25b95553a79"
+        },
+        "version": "1.1.0",
+        "package_name": "goodwin",
+        "cve": ""
+    },
+    {
+        "_id": {
+            "$oid": "6639194ce60df25b95553c6d"
+        },
+        "version": "1.0.6",
+        "package_name": "utilities",
+        "cve": "CVE-2023-26105"
+    },
+    {
+        "_id": {
+            "$oid": "6639194ee60df25b95553fd2"
+        },
+        "package_name": "sext",
+        "version": "0.1.6",
+        "cve": ""
+    },
+    {
+        "_id": {
+            "$oid": "66391950e60df25b95554188"
+        },
+        "version": "1.0.6",
+        "package_name": "npmvc",
+        "cve": ""
+    },
+    {
+        "_id": {
+            "$oid": "66391952e60df25b955543ed"
+        },
+        "package_name": "spud",
+        "version": "2.0.1",
+        "cve": ""
+    },
+    {
+        "_id": {
+            "$oid": "66391955e60df25b95554993"
+        },
+        "package_name": "ometa-js",
+        "version": "1.5.4",
+        "cve": ""
+    },
+    {
+        "_id": {
+            "$oid": "66391974e60df25b95556e6d"
+        },
+        "version": "1.1.0",
+        "package_name": "progressbar.js",
+        "cve": "CVE-2023-26133"
+    },
+    {
+        "_id": {
+            "$oid": "66391975e60df25b95557083"
+        },
+        "package_name": "fist.lang.extend",
+        "version": "0.0.1",
+        "cve": ""
+    },
+    {
+        "_id": {
+            "$oid": "66391977e60df25b95557332"
+        },
+        "package_name": "funcster",
+        "version": "0.0.5",
+        "cve": ""
+    },
+    {
+        "_id": {
+            "$oid": "66391979e60df25b955574ee"
+        },
+        "package_name": "filtr",
+        "version": "0.3.0",
+        "cve": ""
+    },
+    {
+        "_id": {
+            "$oid": "6639197ae60df25b955576ac"
+        },
+        "package_name": "extend-combine",
+        "version": "0.2.0",
+        "cve": ""
+    },
+    {
+        "_id": {
+            "$oid": "6639197be60df25b95557909"
+        },
+        "package_name": "atma-libs",
+        "version": "0.9.75",
+        "cve": ""
+    },
+    {
+        "_id": {
+            "$oid": "6639197ee60df25b95557c04"
+        },
+        "package_name": "algoliasearch-helper",
+        "version": "3.11.1",
+        "cve": ""
+    },
+    {
+        "_id": {
+            "$oid": "66391980e60df25b95557e36"
+        },
+        "version": "0.1.8",
+        "package_name": "jxutils",
+        "cve": ""
+    },
+    {
+        "_id": {
+            "$oid": "66391981e60df25b95558057"
+        },
+        "version": "1.0.29",
+        "package_name": "kmd",
+        "cve": ""
+    },
+    {
+        "_id": {
+            "$oid": "66391983e60df25b9555823e"
+        },
+        "version": "0.4.8",
+        "package_name": "tribe.expressions",
+        "cve": ""
+    },
+    {
+        "_id": {
+            "$oid": "66391985e60df25b9555846e"
+        },
+        "package_name": "dotject",
+        "version": "0.6.6",
+        "cve": ""
+    },
+    {
+        "_id": {
+            "$oid": "66391986e60df25b9555865e"
+        },
+        "package_name": "obop",
+        "version": "0.2.1",
+        "cve": ""
+    },
+    {
+        "_id": {
+            "$oid": "66391988e60df25b9555882f"
+        },
+        "package_name": "homefront",
+        "version": "3.0.0",
+        "cve": ""
+    },
+    {
+        "_id": {
+            "$oid": "66391989e60df25b955589de"
+        },
+        "version": "1.1.0",
+        "package_name": "java.properties.js",
+        "cve": ""
+    },
+    {
+        "_id": {
+            "$oid": "6639198be60df25b95558c72"
+        },
+        "package_name": "sharedjs",
+        "version": "0.0.2",
+        "cve": ""
+    },
+    {
+        "_id": {
+            "$oid": "6639198de60df25b95558ea2"
+        },
+        "package_name": "poser",
+        "version": "1.2.0",
+        "cve": ""
+    },
+    {
+        "_id": {
+            "$oid": "6639198fe60df25b955590d8"
+        },
+        "package_name": "mergee",
+        "version": "1.0.0",
+        "cve": ""
+    },
+    {
+        "_id": {
+            "$oid": "66391990e60df25b9555927c"
+        },
+        "version": "0.2.71",
+        "package_name": "ruta",
+        "cve": ""
+    },
+    {
+        "_id": {
+            "$oid": "66391991e60df25b95559443"
+        },
+        "version": "1.0.1",
+        "package_name": "refify",
+        "cve": ""
+    },
+    {
+        "_id": {
+            "$oid": "66391993e60df25b9555963e"
+        },
+        "version": "0.2.3",
+        "package_name": "query-string-parser",
+        "cve": ""
+    },
+    {
+        "_id": {
+            "$oid": "66391996e60df25b95559991"
+        },
+        "package_name": "pistachio",
+        "version": "0.2.14",
+        "cve": ""
+    },
+    {
+        "_id": {
+            "$oid": "66391999e60df25b95559d61"
+        },
+        "version": "5.0.1",
+        "package_name": "optioner",
+        "cve": ""
+    },
+    {
+        "_id": {
+            "$oid": "6639199ae60df25b95559ef7"
+        },
+        "package_name": "objs",
+        "version": "0.1.0",
+        "cve": ""
+    },
+    {
+        "_id": {
+            "$oid": "6639199be60df25b9555a09b"
+        },
+        "package_name": "object2dot",
+        "version": "1.3.2",
+        "cve": ""
+    },
+    {
+        "_id": {
+            "$oid": "6639199de60df25b9555a262"
+        },
+        "version": "0.2.10",
+        "package_name": "nutol",
+        "cve": ""
+    },
+    {
+        "_id": {
+            "$oid": "6639199fe60df25b9555a4aa"
+        },
+        "version": "0.1.0",
+        "package_name": "sysmo",
+        "cve": ""
+    },
+    {
+        "_id": {
+            "$oid": "663919a0e60df25b9555a65a"
+        },
+        "package_name": "data-synth",
+        "version": "0.7.16",
+        "cve": ""
+    },
+    {
+        "_id": {
+            "$oid": "663919a1e60df25b9555a829"
+        },
+        "version": "1.2.22",
+        "package_name": "dataobject-parser",
+        "cve": ""
+    },
+    {
+        "_id": {
+            "$oid": "663919a3e60df25b9555a9ca"
+        },
+        "version": "1.6.7",
+        "package_name": "dataton",
+        "cve": ""
+    },
+    {
+        "_id": {
+            "$oid": "663919a4e60df25b9555af58"
+        },
+        "package_name": "qs-objects",
+        "version": "0.1.2",
+        "cve": ""
+    },
+    {
+        "_id": {
+            "$oid": "663919a6e60df25b9555b169"
+        },
+        "package_name": "ramped.set",
+        "version": "0.1.0",
+        "cve": ""
+    },
+    {
+        "_id": {
+            "$oid": "663919a7e60df25b9555b35f"
+        },
+        "version": "0.0.1",
+        "package_name": "incremental-eval",
+        "cve": ""
+    },
+    {
+        "_id": {
+            "$oid": "663919a8e60df25b9555b4df"
+        },
+        "package_name": "inquirer_config_builder",
+        "version": "1.0.0",
+        "cve": ""
+    },
+    {
+        "_id": {
+            "$oid": "663919aae60df25b9555b654"
+        },
+        "version": "0.2.0",
+        "package_name": "inner",
+        "cve": ""
+    },
+    {
+        "_id": {
+            "$oid": "663919abe60df25b9555b834"
+        },
+        "version": "2.0.2",
+        "package_name": "set-from-path",
+        "cve": ""
+    },
+    {
+        "_id": {
+            "$oid": "663919ace60df25b9555b9ef"
+        },
+        "version": "0.2.0",
+        "package_name": "dot-qs",
+        "cve": ""
+    },
+    {
+        "_id": {
+            "$oid": "663919aee60df25b9555bbd3"
+        },
+        "version": "0.3.0",
+        "package_name": "dotize",
+        "cve": ""
+    },
+    {
+        "_id": {
+            "$oid": "663919afe60df25b9555bd62"
+        },
+        "version": "1.1.1",
+        "package_name": "diver",
+        "cve": ""
+    },
+    {
+        "_id": {
+            "$oid": "663919b1e60df25b9555bf48"
+        },
+        "package_name": "sailfish-uimixin",
+        "version": "0.0.3",
+        "cve": ""
+    },
+    {
+        "_id": {
+            "$oid": "663919b3e60df25b9555c302"
+        },
+        "version": "1.0.4",
+        "package_name": "topolr-util",
+        "cve": ""
+    },
+    {
+        "_id": {
+            "$oid": "663919b6e60df25b9555c6ac"
+        },
+        "version": "1.0.6",
+        "package_name": "json8-patch",
+        "cve": ""
+    },
+    {
+        "_id": {
+            "$oid": "663919b8e60df25b9555c8a5"
+        },
+        "version": "0.1.0",
+        "package_name": "form2json",
+        "cve": ""
+    },
+    {
+        "_id": {
+            "$oid": "663919b9e60df25b9555ca30"
+        },
+        "package_name": "test-util",
+        "version": "1.1.0",
+        "cve": ""
+    },
+    {
+        "_id": {
+            "$oid": "663919c0e60df25b9555d17f"
+        },
+        "version": "0.0.16",
+        "package_name": "friedjuju",
+        "cve": ""
+    },
+    {
+        "_id": {
+            "$oid": "663919c4e60df25b9555d6a3"
+        },
+        "package_name": "node-jquery-deparam",
+        "version": "0.0.3",
+        "cve": ""
+    },
+    {
+        "_id": {
+            "$oid": "663919c6e60df25b9555d899"
+        },
+        "version": "1.2.32",
+        "package_name": "bitbox",
+        "cve": ""
+    },
+    {
+        "_id": {
+            "$oid": "663919c7e60df25b9555da2e"
+        },
+        "package_name": "astconf",
+        "version": "0.0.7",
+        "cve": ""
+    },
+    {
+        "_id": {
+            "$oid": "663919cae60df25b9555ddbc"
+        },
+        "package_name": "configya",
+        "version": "0.2.3",
+        "cve": ""
+    }
+]

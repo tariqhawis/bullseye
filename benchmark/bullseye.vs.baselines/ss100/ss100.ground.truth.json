@@ -1,0 +1,671 @@
+[
+    {
+        "libDir": "Templ8_lib",
+        "sinks": [
+            "node_modules/Templ8/Templ8.js:299"
+        ]
+    },
+    {
+        "libDir": "a101_lib",
+        "sinks": [
+            "node_modules/keypather/index.js:32",
+            "node_modules/101/defaults.js:45"
+        ]
+    },
+    {
+        "libDir": "arr_flatten_unflatten_lib",
+        "sinks": [
+            "node_modules/arr-flatten-unflatten/unflatten.js:17",
+            "node_modules/arr-flatten-unflatten/unflatten.js:13"
+        ]
+    },
+    {
+        "libDir": "asciitable_js_lib",
+        "sinks": [
+            "node_modules/asciitable.js/asciitable.umd.js:50"
+        ]
+    },
+    {
+        "libDir": "assign_deep_lib",
+        "sinks": [
+            "node_modules/assign-deep/index.js:22"
+        ]
+    },
+    {
+        "libDir": "bmoor_lib",
+        "sinks": [
+            "node_modules/bmoor/src/core.js:194",
+            "node_modules/bmoor/src/core.js:188",
+            "node_modules/bmoor/src/core.js:212",
+            "node_modules/bmoor/src/core.js:205",
+            "node_modules/bmoor/src/object.js:160",
+            "node_modules/bmoor/src/object.js:158"
+        ]
+    },
+    {
+        "libDir": "bodymen_lib",
+        "sinks": [
+            "node_modules/bodymen/dist/index.js:44"
+        ]
+    },
+    {
+        "libDir": "changeset_lib",
+        "sinks": [
+            "node_modules/changeset/index.js:81",
+            "node_modules/changeset/index.js:75",
+            "node_modules/changeset/index.js:96"
+        ]
+    },
+    {
+        "libDir": "class_transformer_lib",
+        "sinks": [
+            "node_modules/class-transformer/TransformOperationExecutor.js:149",
+            "node_modules/class-transformer/TransformOperationExecutor.js:159"
+        ]
+    },
+    {
+        "libDir": "confucious_lib",
+        "sinks": [
+            "node_modules/confucious/confucious.js:48",
+            "node_modules/confucious/confucious.js:45"
+        ]
+    },
+    {
+        "libDir": "connie_lib",
+        "sinks": [
+            "node_modules/connie/lib/utils.js:21",
+            "node_modules/connie/lib/utils.js:11",
+            "node_modules/connie/lib/utils.js:14"
+        ]
+    },
+    {
+        "libDir": "controlled_merge_lib",
+        "sinks": [
+            "node_modules/controlled-merge/index.js:24",
+            "node_modules/controlled-merge/index.js:30",
+            "node_modules/controlled-merge/index.js:28"
+        ]
+    },
+    {
+        "libDir": "copy_props_lib",
+        "sinks": [
+            "node_modules/copy-props/index.js:197"
+        ]
+    },
+    {
+        "libDir": "deap_lib",
+        "sinks": [
+            "node_modules/deap/lib/deap.js:117",
+            "node_modules/deap/lib/deap.js:60"
+        ]
+    },
+    {
+        "libDir": "deep_defaults_lib",
+        "sinks": [
+            "node_modules/deep-defaults/lib/index.js:16"
+        ]
+    },
+    {
+        "libDir": "deep_override_lib",
+        "sinks": [
+            "node_modules/deep-override/src/index.js:53"
+        ]
+    },
+    {
+        "libDir": "deep_set_lib",
+        "sinks": [
+            "node_modules/deep-set/index.js:37"
+        ]
+    },
+    {
+        "libDir": "deephas_lib",
+        "sinks": [
+            "node_modules/deephas/deepHas.js:65"
+        ]
+    },
+    {
+        "libDir": "deeply_lib",
+        "sinks": [
+            "node_modules/deeply/lib/reduce_object.js:19"
+        ]
+    },
+    {
+        "libDir": "deepref_lib",
+        "sinks": [
+            "node_modules/deepref/index.js:29"
+        ]
+    },
+    {
+        "libDir": "deeps_lib",
+        "sinks": [
+            "node_modules/deeps/index.js:226"
+        ]
+    },
+    {
+        "libDir": "defaults_deep_lib",
+        "sinks": [
+            "node_modules/defaults-deep/index.js:26"
+        ]
+    },
+    {
+        "libDir": "dot_notes_lib",
+        "sinks": [
+            "node_modules/dot-notes/lib/create.js:43"
+        ]
+    },
+    {
+        "libDir": "dot_object_lib",
+        "sinks": [
+            "node_modules/dot-object/index.js:415",
+            "node_modules/dot-object/index.js:423",
+            "node_modules/dot-object/dist/dot-object.js:421",
+            "node_modules/dot-object/dist/dot-object.js:429"
+        ]
+    },
+    {
+        "libDir": "dot_prop_lib",
+        "sinks": [
+            "node_modules/dot-prop/index.js:36"
+        ]
+    },
+    {
+        "libDir": "dotty_lib",
+        "sinks": [
+            "node_modules/dotty/lib/index.js:147"
+        ]
+    },
+    {
+        "libDir": "dset_lib",
+        "sinks": [
+            "node_modules/dset/dist/dset.js:6"
+        ]
+    },
+    {
+        "libDir": "expand_hash_lib",
+        "sinks": [
+            "node_modules/expand-hash/index.js:19"
+        ]
+    },
+    {
+        "libDir": "extend_lib",
+        "sinks": [
+            "node_modules/extend/index.js:77"
+        ]
+    },
+    {
+        "libDir": "field_lib",
+        "sinks": [
+            "node_modules/field/lib/field.js:50",
+            "node_modules/field/lib/field.js:39",
+            "node_modules/field/lib/field.js:54",
+            "node_modules/field/lib/field.js:43"
+        ]
+    },
+    {
+        "libDir": "firebase_util_lib",
+        "sinks": [
+            "node_modules/@firebase/util/dist/index.node.cjs.js:437",
+            "node_modules/@firebase/util/dist/index.cjs.js:437",
+            "node_modules/@firebase/util/dist/index.esm.js:433",
+            "node_modules/@firebase/util/dist/index.esm2017.js:431"
+        ]
+    },
+    {
+        "libDir": "flattenizer_lib",
+        "sinks": [
+            "node_modules/flattenizer/src/flattenizer.js:88"
+        ]
+    },
+    {
+        "libDir": "gammautils_lib",
+        "sinks": [
+            "node_modules/gammautils/lib/objectUtils.js:146"
+        ]
+    },
+    {
+        "libDir": "gedi_lib",
+        "sinks": [
+            "node_modules/gedi/modelOperations.js:120"
+        ]
+    },
+    {
+        "libDir": "getobject_lib",
+        "sinks": [
+            "node_modules/getobject/lib/getobject.js:48"
+        ]
+    },
+    {
+        "libDir": "hoek_lib",
+        "sinks": [
+            "node_modules/hoek/lib/index.js:137"
+        ]
+    },
+    {
+        "libDir": "immer_lib",
+        "sinks": [
+            "node_modules/immer/dist/immer.cjs.development.js:1378",
+            "node_modules/immer/dist/immer.cjs.development.js:1393",
+            "node_modules/immer/dist/immer.esm.js:1",
+            "node_modules/immer/dist/immer.umd.development.js:1380",
+            "node_modules/immer/dist/immer.umd.development.js:1395"
+        ]
+    },
+    {
+        "libDir": "ini_parser_lib",
+        "sinks": [
+            "node_modules/ini-parser/index.js:14"
+        ]
+    },
+    {
+        "libDir": "js_data_lib",
+        "sinks": [
+            "node_modules/js-data/dist/js-data.js:469"
+        ]
+    },
+    {
+        "libDir": "js_extend_lib",
+        "sinks": [
+            "node_modules/js-extend/extend.js:17"
+        ]
+    },
+    {
+        "libDir": "js_ini_lib",
+        "sinks": [
+            "node_modules/js-ini/lib/parse.js:51"
+        ]
+    },
+    {
+        "libDir": "json8_merge_patch_lib",
+        "sinks": [
+            "node_modules/json8-merge-patch/lib/apply.js:25"
+        ]
+    },
+    {
+        "libDir": "json_ptr_lib",
+        "sinks": [
+            "node_modules/json-ptr/index.js:277"
+        ]
+    },
+    {
+        "libDir": "just_extend_lib",
+        "sinks": [
+            "node_modules/just-extend/index.js:52"
+        ]
+    },
+    {
+        "libDir": "keyd_lib",
+        "sinks": [
+            "node_modules/keyd/index.js:76"
+        ]
+    },
+    {
+        "libDir": "keyget_lib",
+        "sinks": [
+            "node_modules/keyget/index.js:111",
+            "node_modules/keyget/index.js:108",
+            "node_modules/keyget/index.js:148",
+            "node_modules/keyget/index.js:188"
+        ]
+    },
+    {
+        "libDir": "libnested_lib",
+        "sinks": [
+            "node_modules/libnested/index.js:27"
+        ]
+    },
+    {
+        "libDir": "linux_cmdline_lib",
+        "sinks": [
+            "node_modules/linux-cmdline/index.js:48"
+        ]
+    },
+    {
+        "libDir": "locutus_lib",
+        "sinks": [
+            "node_modules/locutus/php/strings/parse_str.js:156"
+        ]
+    },
+    {
+        "libDir": "lodash_lib",
+        "sinks": [
+            "node_modules/lodash/lodash.js:2559"
+        ]
+    },
+    {
+        "libDir": "madlib_object_utils_lib",
+        "sinks": [
+            "node_modules/madlib-object-utils/lib/utils.js:60"
+        ]
+    },
+    {
+        "libDir": "merge_deep_lib",
+        "sinks": [
+            "node_modules/merge-deep/index.js:45",
+            "node_modules/merge-deep/index.js:43",
+            "node_modules/merge-deep/index.js:41"
+        ]
+    },
+    {
+        "libDir": "merge_lib",
+        "sinks": [
+            "node_modules/merge/lib/src/index.js:59"
+        ]
+    },
+    {
+        "libDir": "merge_recursive_lib",
+        "sinks": [
+            "node_modules/merge-recursive/lib/index.js:66"
+        ]
+    },
+    {
+        "libDir": "mixin_deep_lib",
+        "sinks": [
+            "node_modules/mixin-deep/index.js:21"
+        ]
+    },
+    {
+        "libDir": "mout_lib",
+        "sinks": [
+            "node_modules/mout/object/set.js:10",
+            "node_modules/mout/object/deepFillIn.js:19"
+        ]
+    },
+    {
+        "libDir": "mpath_lib",
+        "sinks": [
+            "node_modules/mpath/lib/index.js:269"
+        ]
+    },
+    {
+        "libDir": "nconf_toml_lib",
+        "sinks": [
+            "node_modules/toml/lib/compiler.js:55"
+        ]
+    },
+    {
+        "libDir": "nested_property_lib",
+        "sinks": [
+            "node_modules/nested-property/index.js:97"
+        ]
+    },
+    {
+        "libDir": "nestie_lib",
+        "sinks": [
+            "node_modules/nestie/dist/index.js:29"
+        ]
+    },
+    {
+        "libDir": "nis_utils_lib",
+        "sinks": [
+            "node_modules/nis-utils/lib/object.js:166",
+            "node_modules/nis-utils/lib/object.js:168"
+        ]
+    },
+    {
+        "libDir": "node_extend_lib",
+        "sinks": [
+            "node_modules/node.extend/lib/extend.js:65"
+        ]
+    },
+    {
+        "libDir": "node_forge_lib",
+        "sinks": [
+            "node_modules/node-forge/lib/util.js:2536"
+        ]
+    },
+    {
+        "libDir": "nodee_utils_lib",
+        "sinks": [
+            "node_modules/nodee-utils/lib/object.js:210",
+            "node_modules/nodee-utils/lib/object.js:212"
+        ]
+    },
+    {
+        "libDir": "object_collider_lib",
+        "sinks": [
+            "node_modules/object-collider/dist/src/utils/CollideUtil.js:79",
+            "node_modules/object-collider/dist/src/utils/CollideUtil.js:72"
+        ]
+    },
+    {
+        "libDir": "object_path_set_lib",
+        "sinks": [
+            "node_modules/object-path-set/index.js:19",
+            "node_modules/object-path-set/index.js:17"
+        ]
+    },
+    {
+        "libDir": "objnest_lib",
+        "sinks": [
+            "node_modules/extend/index.js:46"
+        ]
+    },
+    {
+        "libDir": "objtools_lib",
+        "sinks": [
+            "node_modules/objtools/lib/index.js:440",
+            "node_modules/objtools/lib/index.js:533",
+            "node_modules/objtools/lib/index.js:349",
+            "node_modules/objtools/lib/index.js:563",
+            "node_modules/objtools/lib/index.js:565"
+        ]
+    },
+    {
+        "libDir": "patchmerge_lib",
+        "sinks": [
+            "node_modules/patchmerge/index.js:93"
+        ]
+    },
+    {
+        "libDir": "paypal_adaptive_lib",
+        "sinks": [
+            "node_modules/paypal-adaptive/lib/paypal-adaptive.js:31"
+        ]
+    },
+    {
+        "libDir": "phpjs_lib",
+        "sinks": [
+            "node_modules/phpjs/build/npm.js:6421"
+        ]
+    },
+    {
+        "libDir": "predefine_lib",
+        "sinks": [
+            "node_modules/predefine/index.js:284"
+        ]
+    },
+    {
+        "libDir": "promisehelpers_lib",
+        "sinks": [
+            "node_modules/promisehelpers/src/index.js:20"
+        ]
+    },
+    {
+        "libDir": "properties_reader_lib",
+        "sinks": [
+            "node_modules/properties-reader/src/properties-reader.js:200"
+        ]
+    },
+    {
+        "libDir": "property_expr_lib",
+        "sinks": [
+            "node_modules/property-expr/index.js:55"
+        ]
+    },
+    {
+        "libDir": "prototyped_js_lib",
+        "sinks": [
+            "node_modules/prototyped.js/dist/object/set/index.js:11"
+        ]
+    },
+    {
+        "libDir": "putil_merge_lib",
+        "sinks": [
+            "node_modules/putil-merge/lib/merge.js:72",
+            "node_modules/putil-merge/lib/merge.js:65"
+        ]
+    },
+    {
+        "libDir": "querymen_lib",
+        "sinks": [
+            "node_modules/querymen/dist/index.js:46"
+        ]
+    },
+    {
+        "libDir": "safe_flat_lib",
+        "sinks": [
+            "node_modules/safe-flat/src/index.js:48"
+        ]
+    },
+    {
+        "libDir": "safe_obj_lib",
+        "sinks": [
+            "node_modules/safe-obj/lib/index.js:122"
+        ]
+    },
+    {
+        "libDir": "safe_object2_lib",
+        "sinks": [
+            "node_modules/safe-object2/index.js:53"
+        ]
+    },
+    {
+        "libDir": "safetydance_lib",
+        "sinks": [
+            "node_modules/safetydance/index.js:215"
+        ]
+    },
+    {
+        "libDir": "set_deep_prop_lib",
+        "sinks": [
+            "node_modules/set-deep-prop/set-deep-prop.js:20"
+        ]
+    },
+    {
+        "libDir": "set_getter_lib",
+        "sinks": [
+            "node_modules/set-getter/index.js:72"
+        ]
+    },
+    {
+        "libDir": "set_in_lib",
+        "sinks": [
+            "node_modules/set-in/index.js:32"
+        ]
+    },
+    {
+        "libDir": "set_object_value_lib",
+        "sinks": [
+            "node_modules/set-object-value/build/cjs/src/index.js:24",
+            "node_modules/set-object-value/build/es/src/index.js:17"
+        ]
+    },
+    {
+        "libDir": "set_or_get_lib",
+        "sinks": [
+            "set_or_get.PoC.js:5"
+        ]
+    },
+    {
+        "libDir": "set_value_lib",
+        "sinks": [
+            "node_modules/set-value/index.js:59",
+            "node_modules/set-value/index.js:57"
+        ]
+    },
+    {
+        "libDir": "shvl_lib",
+        "sinks": [
+            "node_modules/shvl/index.js:8"
+        ]
+    },
+    {
+        "libDir": "smart_extend_lib",
+        "sinks": [
+            "node_modules/smart-extend/dist/smart-extend.debug.js:237"
+        ]
+    },
+    {
+        "libDir": "strikeentco_set_lib",
+        "sinks": [
+            "node_modules/@strikeentco/set/main.js:11"
+        ]
+    },
+    {
+        "libDir": "supermixer_lib",
+        "sinks": [
+            "node_modules/supermixer/dist/mixer.js:86"
+        ]
+    },
+    {
+        "libDir": "tiny_conf_lib",
+        "sinks": [
+            "node_modules/tiny-conf/tiny-conf.js:73",
+            "node_modules/tiny-conf/tiny-conf.js:66",
+            "node_modules/tiny-conf/tiny-conf.js:107",
+            "node_modules/tiny-conf/tiny-conf.js:92"
+        ]
+    },
+    {
+        "libDir": "total_js_lib",
+        "sinks": [
+            "node_modules/total.js/utils.js:6624"
+        ]
+    },
+    {
+        "libDir": "undefsafe_lib",
+        "sinks": [
+            "node_modules/undefsafe/lib/undefsafe.js:106"
+        ]
+    },
+    {
+        "libDir": "upmerge_lib",
+        "sinks": [
+            "node_modules/upmerge/build/upmerge.js:1",
+            "node_modules/upmerge/src/upmerge.js:142",
+            "node_modules/upmerge/src/upmerge.js:134",
+            "node_modules/upmerge/src/upmerge.js:138"
+        ]
+    },
+    {
+        "libDir": "utils_extend_lib",
+        "sinks": [
+            "node_modules/utils-extend/index.js:46"
+        ]
+    },
+    {
+        "libDir": "worksmith_lib",
+        "sinks": [
+            "node_modules/worksmith/index.js:300"
+        ]
+    },
+    {
+        "libDir": "y18n_lib",
+        "sinks": [
+            "node_modules/y18n/index.js:156",
+            "node_modules/y18n/index.js:30",
+            "node_modules/y18n/index.js:123"
+        ]
+    },
+    {
+        "libDir": "yargs_lib",
+        "sinks": [
+            "node_modules/yargs/lib/parser.js:429",
+            "node_modules/yargs/lib/parser.js:419",
+            "node_modules/yargs/lib/parser.js:425",
+            "node_modules/yargs/lib/parser.js:427",
+            "node_modules/yargs/lib/parser.js:433"
+        ]
+    },
+    {
+        "libDir": "yargs_parser_lib",
+        "sinks": [
+            "node_modules/yargs-parser/index.js:587",
+            "node_modules/yargs-parser/index.js:562",
+            "node_modules/yargs-parser/index.js:573",
+            "node_modules/yargs-parser/index.js:576",
+            "node_modules/yargs-parser/index.js:580",
+            "node_modules/yargs-parser/index.js:583"
+        ]
+    }
+]

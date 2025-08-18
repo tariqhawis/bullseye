@@ -1,0 +1,135 @@
+[
+    {
+        "libDir": "asciitable.js@1.0.2",
+        "sinks": [
+            "asciitable.js@1.0.2/asciitable.umd.js:50:99"
+        ]
+    },
+    {
+        "libDir": "bayrell-nodejs@0.8.0",
+        "sinks": [
+            "bayrell-nodejs@0.8.0/use.js:69:4",
+            "bayrell-nodejs@0.8.0/use.js:73:27"
+        ]
+    },
+    {
+        "libDir": "blindfold@1.0.1",
+        "sinks": [
+            "blindfold@1.0.1/index.js:33:7"
+        ]
+    },
+    {
+        "libDir": "class-transformer@0.2.3",
+        "sinks": [
+            "class-transformer@0.2.3/TransformOperationExecutor.js:242:25:242:32",
+            "class-transformer@0.2.3/TransformOperationExecutor.js:252:25:252:32"
+        ]
+    },
+    {
+        "libDir": "debt@0.0.4",
+        "sinks": [
+            "debt@0.0.4/lib/util.js:51:4",
+            "debt@0.0.4/lib/util.js:47:4"
+        ]
+    },
+    {
+        "libDir": "dnspod-client@0.1.3",
+        "sinks": [
+            "dnspod-client@0.1.3/src/dnspod.js:17:21",
+            "dnspod-client@0.1.3/src/dnspod.js:21:17",
+            "dnspod-client@0.1.3/src/dnspod.js:15:21"
+        ]
+    },
+    {
+        "libDir": "draft@0.2.3",
+        "sinks": [
+            "draft@0.2.3/index.js:41:9",
+            "draft@0.2.3/index.js:47:7",
+            "draft@0.2.3/index.js:628:11",
+            "draft@0.2.3/index.js:38:9:38:12"
+        ]
+    },
+    {
+        "libDir": "extend2@1.0.0",
+        "sinks": [
+            "extend2@1.0.0/index.js:64:9",
+            "extend2@1.0.0/index.js:60:9"
+        ]
+    },
+    {
+        "libDir": "fetch-wrap@0.1.2",
+        "sinks": [
+            "fetch-wrap@0.1.2/src/main.js:43:9"
+        ]
+    },
+    {
+        "libDir": "field@1.0.1",
+        "sinks": [
+            "field@1.0.1/lib/field.js:50:9",
+            "field@1.0.1/lib/field.js:39:9",
+            "field@1.0.1/lib/field.js:54:9",
+            "field@1.0.1/lib/field.js:43:11"
+        ]
+    },
+    {
+        "libDir": "fun-map@3.3.1",
+        "sinks": [
+            "fun-map@3.3.1/index.js:147:3",
+            "fun-map@3.3.1/index.js:143:24"
+        ]
+    },
+    {
+        "libDir": "grunt-util-property@0.0.2",
+        "sinks": [
+            "grunt-util-property@0.0.2/main.js:41:11:41:14",
+            "grunt-util-property@0.0.2/main.js:36:14:36:17"
+        ]
+    },
+    {
+        "libDir": "jquery-deparam@0.5.3",
+        "sinks": [
+            "jquery-deparam@0.5.3/jquery-deparam.js:84:31"
+        ]
+    },
+    {
+        "libDir": "lodash._baseset@4.3.0",
+        "sinks": [
+            "lodash._baseset@4.3.0/index.js:52:5"
+        ]
+    },
+    {
+        "libDir": "magico@1.1.1",
+        "sinks": [
+            "magico@1.1.1/index.js:99:9",
+            "magico@1.1.1/index.js:94:11"
+        ]
+    },
+    {
+        "libDir": "node-file-cache@1.0.2",
+        "sinks": [
+            "node-file-cache@1.0.2/lib/index.js:106:21:106:21",
+            "node-file-cache@1.0.2/lib/index.js:110:17:110:17",
+            "node-file-cache@1.0.2/lib/index.js:103:21:103:21"
+        ]
+    },
+    {
+        "libDir": "object-helpers@0.0.4",
+        "sinks": [
+            "object-helpers@0.0.4/index.js:51:9",
+            "object-helpers@0.0.4/index.js:47:9"
+        ]
+    },
+    {
+        "libDir": "parse-mockdb@0.4.0",
+        "sinks": [
+            "parse-mockdb@0.4.0/src/parse-mockdb.js:210:3"
+        ]
+    },
+    {
+        "libDir": "propper@1.0.3",
+        "sinks": [
+            "propper@1.0.3/index.js:44:5",
+            "propper@1.0.3/index.js:31:22"
+        ]
+    }
+]

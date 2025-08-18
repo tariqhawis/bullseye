@@ -1,0 +1,501 @@
+[
+    {
+        "package_name": "101",
+        "version": "1.6.3",
+        "repo": "https://github.com/tjmehta/101"
+    },
+    {
+        "package_name": "arr-flatten-unflatten",
+        "version": "1.1.4",
+        "repo": "https://git@github.com/Quernest/arr-flatten-unflatten"
+    },
+    {
+        "package_name": "asciitable.js",
+        "version": "1.0.2",
+        "repo": "https://github.com/victornpb/asciitable.js"
+    },
+    {
+        "package_name": "assign-deep",
+        "version": "1.0.0",
+        "repo": "https://github.com/jonschlinkert/assign-deep"
+    },
+    {
+        "package_name": "bmoor",
+        "version": "0.8.11",
+        "repo": "https://github.com/b-heilman/bmoor"
+    },
+    {
+        "package_name": "bodymen",
+        "version": "1.0.0",
+        "repo": "https://github.com/diegohaz/bodymen"
+    },
+    {
+        "package_name": "changeset",
+        "version": "0.1.0",
+        "repo": "https://github.com/eugeneware/changeset"
+    },
+    {
+        "package_name": "class-transformer",
+        "version": "0.1.1",
+        "repo": "https://github.com/typestack/class-transformer"
+    },
+    {
+        "package_name": "confucious",
+        "version": "0.0.12",
+        "repo": "https://github.com/Real-Serious-Games/confucious"
+    },
+    {
+        "package_name": "connie",
+        "version": "0.1.0",
+        "repo": "https://github.com/mattinsler/connie"
+    },
+    {
+        "package_name": "controlled-merge",
+        "version": "1.0.0"
+    },
+    {
+        "package_name": "copy-props",
+        "version": "2.0.4",
+        "repo": "https://github.com/gulpjs/copy-prop"
+    },
+    {
+        "package_name": "deap",
+        "version": "1.0.0",
+        "repo": "https://github.com/selfcontained/deap"
+    },
+    {
+        "package_name": "deep-defaults",
+        "version": "1.0.5",
+        "repo": "https://github.com/d5/deep-defaults"
+    },
+    {
+        "package_name": "deep-override",
+        "version": "1.0.0",
+        "repo": "https://github.com/ASaiAnudeep/deep-override"
+    },
+    {
+        "package_name": "deep-set",
+        "version": "1.0.0",
+        "repo": "https://github.com/klaemo/deep-set"
+    },
+    {
+        "package_name": "deephas",
+        "version": "1.0.5",
+        "repo": "https://git@github.com/sharpred/deepHas"
+    },
+    {
+        "package_name": "deeply",
+        "version": "3.0.0",
+        "repo": "https://github.com/alexindigo/deeply"
+    },
+    {
+        "package_name": "deepref",
+        "version": "1.1.1",
+        "repo": "https://github.com/isaymatato/deepref"
+    },
+    {
+        "package_name": "deeps",
+        "version": "1.4.5",
+        "repo": "https://github.com/Salakar/deeps"
+    },
+    {
+        "package_name": "defaults-deep",
+        "version": "0.2.4",
+        "repo": "https://github.com/jonschlinkert/defaults-deep"
+    },
+    {
+        "package_name": "dot-object",
+        "version": "2.1.2",
+        "repo": "https://github.com/rhalff/dot-object"
+    },
+    {
+        "package_name": "dot-prop",
+        "version": "2.0.0",
+        "repo": "https://github.com/sindresorhus/dot-prop"
+    },
+    {
+        "package_name": "dot-notes",
+        "version": "3.2.0",
+        "repo": "https://git@github.com/whitfin/dot-notes-js"
+    },
+    {
+        "package_name": "dotty",
+        "version": "0.0.1",
+        "repo": "https://github.com/deoxxa/dotty"
+    },
+    {
+        "package_name": "dset",
+        "version": "1.0.0",
+        "repo": "https://github.com/lukeed/dset"
+    },
+    {
+        "package_name": "expand-hash",
+        "version": "1.0.1",
+        "repo": "https://github.com/doowb/expand-hash"
+    },
+    {
+        "package_name": "extend",
+        "version": "3.0.1",
+        "repo": "https://github.com/justmoon/node-extend"
+    },
+    {
+        "package_name": "field",
+        "version": "1.0.1",
+        "repo": "https://github.com/jprichardson/field"
+    },
+    {
+        "package_name": "@firebase/util",
+        "version": "0.3.2",
+        "repo": "https://github.com/firebase/firebase-js-sdk"
+    },
+    {
+        "package_name": "flattenizer",
+        "version": "0.0.5",
+        "repo": "https://github.com/sahellebusch/flattenizer"
+    },
+    {
+        "package_name": "gammautils",
+        "version": "0.0.81",
+        "repo": "https://github.com/gammasoft/utils"
+    },
+    {
+        "package_name": "gedi",
+        "version": "1.6.3",
+        "repo": "https://github.com/KoryNunn/gedi"
+    },
+    {
+        "package_name": "getobject",
+        "version": "0.1.0",
+        "repo": "https://github.com/cowboy/node-getobject"
+    },
+    {
+        "package_name": "hoek",
+        "version": "5.0.0",
+        "repo": "https://github.com/hapijs/hoek"
+    },
+    {
+        "package_name": "immer",
+        "version": "8.0.0",
+        "repo": "https://github.com/immerjs/immer"
+    },
+    {
+        "package_name": "ini-parser",
+        "version": "0.0.2",
+        "repo": "https://rawiroaisen/node-ini-parser"
+    },
+    {
+        "package_name": "js-data",
+        "version": "3.0.8",
+        "repo": "https://github.com/js-data/js-data"
+    },
+    {
+        "package_name": "js-extend",
+        "version": "0.0.1",
+        "repo": "https://github.com/vmattos/js-extend"
+    },
+    {
+        "package_name": "js-ini",
+        "version": "1.2.0",
+        "repo": false
+    },
+    {
+        "package_name": "json-ptr",
+        "version": "1.1.0",
+        "repo": "https://github.com/flitbit/json-ptr"
+    },
+    {
+        "package_name": "json8-merge-patch",
+        "version": "1.0.1",
+        "repo": "https://github.com/sonnyp/JSON8"
+    },
+    {
+        "package_name": "just-extend",
+        "version": "3.0.0",
+        "repo": "https://github.com/angus-c/just"
+    },
+    {
+        "package_name": "keyd",
+        "version": "1.3.4",
+        "repo": "https://github.com/trenskow/keyd"
+    },
+    {
+        "package_name": "keyget",
+        "version": "2.2.0",
+        "repo": "https://github.com/rumkin/keyget"
+    },
+    {
+        "package_name": "libnested",
+        "version": "1.5.0",
+        "repo": "https://github.com/dominictarr/libnested"
+    },
+    {
+        "package_name": "linux-cmdline",
+        "version": "1.0.0",
+        "repo": "https://github.com/piranna/linux-cmdline"
+    },
+    {
+        "package_name": "locutus",
+        "version": "2.0.11",
+        "repo": "https://github.com/locutusjs/locutus"
+    },
+    {
+        "package_name": "lodash",
+        "version": "4.17.11",
+        "repo": "https://github.com/lodash/lodash"
+    },
+    {
+        "package_name": "madlib-object-utils",
+        "version": "0.1.6",
+        "repo": "https://github.com/Qwerios/madlib-object-utils"
+    },
+    {
+        "package_name": "merge",
+        "version": "2.1.0",
+        "repo": "https://github.com/yeikos/js.merge"
+    },
+    {
+        "package_name": "merge-deep",
+        "version": "3.0.0",
+        "repo": "https://github.com/jonschlinkert/merge-deep"
+    },
+    {
+        "package_name": "merge-recursive",
+        "version": "0.0.3",
+        "repo": "https://github.com/UmbraEngineering/node-merge-recursive"
+    },
+    {
+        "package_name": "mixin-deep",
+        "version": "2.0.0",
+        "repo": "https://github.com/jonschlinkert/mixin-deep"
+    },
+    {
+        "package_name": "mout",
+        "version": "2.0.0-alpha.1",
+        "repo": "https://github.com/mout/mout"
+    },
+    {
+        "package_name": "mpath",
+        "version": "0.4.1",
+        "repo": "https://github.com/aheckmann/mpath"
+    },
+    {
+        "package_name": "nconf-toml",
+        "version": "0.0.1",
+        "repo": "https://github.com/RobLoach/nconf-toml"
+    },
+    {
+        "package_name": "nested-property",
+        "version": "0.0.5",
+        "repo": "https://git@github.com/cosmosio/nested-property"
+    },
+    {
+        "package_name": "nestie",
+        "version": "1.0.0",
+        "repo": "https://github.com/lukeed/nestie"
+    },
+    {
+        "package_name": "nis-utils",
+        "version": "0.6.10",
+        "repo": "https://github.com/nowitssimple/utils"
+    },
+    {
+        "package_name": "node.extend",
+        "version": "2.0.0",
+        "repo": "https://github.com/dreamerslab/node.extend"
+    },
+    {
+        "package_name": "node-forge",
+        "version": "0.9.0",
+        "repo": "https://github.com/digitalbazaar/forge"
+    },
+    {
+        "package_name": "nodee-utils",
+        "version": "1.2.2",
+        "repo": "https://github.com/nodee-apps/utils"
+    },
+    {
+        "package_name": "object-collider",
+        "version": "1.0.3",
+        "repo": "https://github.com/FireBlinkLTD/object-collider"
+    },
+    {
+        "package_name": "object-path-set",
+        "version": "1.0.0",
+        "repo": "https://github.com/skratchdot/object-path-set"
+    },
+    {
+        "package_name": "objnest",
+        "version": "5.0.0",
+        "repo": "https://github.com/okunishinishi/node-objnest"
+    },
+    {
+        "package_name": "objtools",
+        "version": "3.0.0",
+        "repo": "https://github.com/CrispyConductor/objtools"
+    },
+    {
+        "package_name": "patchmerge",
+        "version": "1.0.0",
+        "repo": "https://github.com/pjshumphreys/patchmerge"
+    },
+    {
+        "package_name": "paypal-adaptive",
+        "version": "0.4.1",
+        "repo": "https://github.com/gaguirre/paypal-adaptive-sdk-nodejs"
+    },
+    {
+        "package_name": "phpjs",
+        "version": "1.3.2",
+        "repo": "https://github.com/kvz/phpjs"
+    },
+    {
+        "package_name": "predefine",
+        "version": "0.1.2",
+        "repo": "https://github.com/bigpipe/predefine"
+    },
+    {
+        "package_name": "promisehelpers",
+        "version": "0.0.5",
+        "repo": "https://github.com/yola/promisehelpers"
+    },
+    {
+        "package_name": "properties-reader",
+        "version": "2.0.0",
+        "repo": "https://github.com/steveukx/properties"
+    },
+    {
+        "package_name": "property-expr",
+        "version": "2.0.2",
+        "repo": "https://github.com/jquense/expr"
+    },
+    {
+        "package_name": "prototyped.js",
+        "version": "2.0.0",
+        "repo": "https://github.com/ardalanamini/prototyped.js"
+    },
+    {
+        "package_name": "putil-merge",
+        "version": "3.0.0",
+        "repo": "https://github.com/panates/putil-merge"
+    },
+    {
+        "package_name": "querymen",
+        "version": "2.1.3",
+        "repo": "https://github.com/diegohaz/querymen"
+    },
+    {
+        "package_name": "safe-flat",
+        "version": "2.0.0",
+        "repo": "https://github.com/jessie-codes/safe-flat"
+    },
+    {
+        "package_name": "safe-object2",
+        "version": "1.0.3",
+        "repo": "https://github.com/jiameng123/safe-object"
+    },
+    {
+        "package_name": "safe-obj",
+        "version": "1.0.0",
+        "repo": "https://github.com/tandrewnichols/safe-obj"
+    },
+    {
+        "package_name": "safetydance",
+        "version": "2.0.1",
+        "repo": "https://github.com/gramakri/safetydance"
+    },
+    {
+        "package_name": "set-deep-prop",
+        "version": "1.0.0",
+        "repo": "https://git@github.com/mmckelvy/set-deep-prop"
+    },
+    {
+        "package_name": "set-getter",
+        "version": "0.1.0",
+        "repo": "https://github.com/doowb/set-getter"
+    },
+    {
+        "package_name": "set-in",
+        "version": "2.0.0",
+        "repo": "https://github.com/ahdinosaur/set-in"
+    },
+    {
+        "package_name": "set-object-value",
+        "version": "0.0.5",
+        "repo": "https://github.com/react-atomic/react-atomic-organism"
+    },
+    {
+        "package_name": "set-or-get",
+        "version": "1.2.10",
+        "repo": "https://git@github.com/IonicaBizau/set-or-get.js"
+    },
+    {
+        "package_name": "set-value",
+        "version": "3.0.0",
+        "repo": "https://github.com/jonschlinkert/set-value"
+    },
+    {
+        "package_name": "shvl",
+        "version": "2.0.1",
+        "repo": "https://github.com/robinvdvleuten/shvl"
+    },
+    {
+        "package_name": "smart-extend",
+        "version": "1.7.3",
+        "repo": "https://github.com/danielkalen/smart-extend"
+    },
+    {
+        "package_name": "@strikeentco/set",
+        "version": "1.0.0",
+        "repo": "https://github.com/strikeentco/set"
+    },
+    {
+        "package_name": "supermixer",
+        "version": "1.0.3",
+        "repo": "https://github.com/stampit-org/supermixer"
+    },
+    {
+        "package_name": "Templ8",
+        "version": "0.7.0",
+        "repo": "https://constantology/Templ8"
+    },
+    {
+        "package_name": "tiny-conf",
+        "version": "1.1.0",
+        "repo": "https://github.com/tiny-conf/tiny-conf"
+    },
+    {
+        "package_name": "total.js",
+        "version": "3.4.6",
+        "repo": "https://github.com/totaljs/framework"
+    },
+    {
+        "package_name": "undefsafe",
+        "version": "2.0.2",
+        "repo": "https://github.com/remy/undefsafe"
+    },
+    {
+        "package_name": "upmerge",
+        "version": "0.1.7",
+        "repo": "https://github.com/jazzfog/UpMerge"
+    },
+    {
+        "package_name": "utils-extend",
+        "version": "1.0.8",
+        "repo": "https://github.com/douzi8/utils-extend"
+    },
+    {
+        "package_name": "worksmith",
+        "version": "1.0.0",
+        "repo": "https://github.com/guidesmiths/worksmith"
+    },
+    {
+        "package_name": "y18n",
+        "version": "3.2.1",
+        "repo": "https://github.com/yargs/y18n"
+    },
+    {
+        "package_name": "yargs-parser",
+        "version": "6.0.0",
+        "repo": "https://github.com/yargs/yargs-parser"
+    }
+]

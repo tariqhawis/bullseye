@@ -1,0 +1,16 @@
+node_modules/extend2/index.js:64
+node_modules/extend2/index.js:60
+node_modules/propper/index.js:44
+node_modules/propper/index.js:31
+node_modules/fetch-wrap/src/main.js:43
+node_modules/class-transformer/TransformOperationExecutor.js:242
+node_modules/magico/index.js:99
+node_modules/magico/index.js:94
+node_modules/lodash._baseset/index.js:52
+node_modules/field/lib/field.js:50
+node_modules/field/lib/field.js:54
+node_modules/fun-map/index.js:147
+node_modules/fun-map/index.js:143
+node_modules/blindfold/index.js:33
+node_modules/object-helpers/index.js:51
+node_modules/object-helpers/index.js:47
