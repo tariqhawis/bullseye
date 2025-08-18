@@ -35,10 +35,10 @@ This repository contains the implementation prototype of the approach described 
 
 ## Usage
 
-First, create the dataset file, containing the list of the packages in the format "package@version". We use npmPath to install the packages at a sepcific location.
+First, create the dataset file, containing the list of the packages in the format "package@version". npmPath used to specify that location to which the packages are installed
 
 ```bash
-node setup.js --input "npmDataset.txt" --npmPath "benchmark"
+node setup.js --input "dataset/npm6588.json" --npmPath "/home/benchmark/npm6k"
 ```
 
 Second, build the bullseye image (which act as the sandbox for each package analysis)
@@ -50,44 +50,45 @@ docker build -t bullseye:latest .
 Finally, run the analysis tool, passing the dataset file to the script.
 
 ```bash
-node run.js --input "npmDataset.txt" [options]
+node run.js --input "dataset/npm6588.json" --npmPath "/home/benchmark/npm6k" --parallel 32 [options]
+```
+
+or analyze one package
+
+```bash
+node run.js --input "defaults-deep@0.2.3" --npmPath "/home/benchmark/npm6k" [options]
 ```
 
 ## Parameters
 
-| Parameter          | Description                                                                 | Default               | Example                                 |
-| ------------------ | --------------------------------------------------------------------------- | --------------------- | --------------------------------------- |
-| `--input <file>`   | Path to input file (JSON or TXT) with package list or single package string | `dataset/npm47k.json` | `--input data.json`                     |
-| `--tool <file>`    | Path to the tool to run (relative to project root)                          | `bullseye.mjs`        | `--tool baselines/fuzzproto_fnEnum.mjs` |
-| `--install`        | Install the package before running the tool                                 | `false`               | `--install`                             |
-| `--vm`             | Run entry points within Node.js VM                                          | `true`                | `--vm=false`                            |
-| `--sandbox`        | Run the tool in a Docker container                                          | `true`                | `--sandbox=false`                       |
-| `--output <file>`  | Export results to a file or stdout                                          | `stdout`              | `--output file.json`                    |
-| `--parallel <num>` | Number of concurrent packages to process                                    | `1`                   | `--parallel 8`                          |
-| `--cveCheck`       | Enable CVE check                                                            | `false`               | `--cveCheck`                            |
-| `--timeout <ms>`   | Timeout for each package (milliseconds)                                     | `120000`              | `--timeout 300000`                      |
-| `-h`, `--help`     | Show help message                                                           |                       | `--help`                                |
+| Parameter                             | Description                                                                                                                                                                         | Default               | Example                                   |
+| ------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------- | ----------------------------------------- |
+| `--input <file>`                      | Path to input file (JSON or TXT) with package list or single package string                                                                                                         | `dataset/npm47k.json` | `--input data.json`                       |
+| `--format ["ss", "odgen", "default"]` | the format used for naming the package's folder, e.g., ss, odgen, leave it blank if you want the package to install normally in the current folder "if `npm init` is done already!" | `default`             | `--format "ss"`                           |
+| `--tool <file>`                       | Path to the bullseye variation tool to run, used for run the variations of bullseye with disabled components                                                                        | `bullseye.mjs`        | `--tool baselines/fuzzproto_fnEnum.mjs`   |
+| `--npmPath <file>`                    | Path to which the package is installed "excluding the npm generated path, i.e., node_modules/package@version"                                                                       | `${projDir}/npm`      | `--tool baselines/fuzzproto_fnEnum.mjs`   |
+| `--install`                           | Install the package before running the tool (exist in setup.js)                                                                                                                     | `false`               | `setup.js --install "dataset/npm6k.json"` |
+| `--vm`                                | Run entry points within Node.js VM                                                                                                                                                  | `true`                | `--vm=false`                              |
+| `--sandbox`                           | Run the tool in a Docker container                                                                                                                                                  | `true`                | `--sandbox=false`                         |
+| `--output <file>`                     | Export results to a file or stdout                                                                                                                                                  | `stdout`              | `--output file.json`                      |
+| `--parallel <num>`                    | Number of concurrent packages to process                                                                                                                                            | `1`                   | `--parallel 8`                            |
+| `--cveCheck`                          | Enable CVE check                                                                                                                                                                    | `false`               | `--cveCheck`                              |
+| `--timeout <ms>`                      | Timeout for each package (milliseconds)                                                                                                                                             | `120000`              | `--timeout 300000`                        |
+| `-h`, `--help`                        | Show help message                                                                                                                                                                   |                       | `--help`                                  |
 
 ## Input File Format
 
-- **JSON**: Array of objects with at least `package_name` and `version` fields.
-- **TXT**: One package per line, e.g., `lodash@4.17.21`.
-
-## Example
-
-```bash
-node run.js --input dataset/npm6588.json --output file --parallel 32
-```
+Bullseye supports dataset files with JSON format "as array of objects with at least `package_name` and `version` fields", and TXT format "One package per line, e.g., `lodash@4.17.21`".
 
 ## Output
 
-- Results are printed to stdout or written to the specified output file.
+- Results are printed to stdout or written to the specified output file "under raw-data subdirectory".
 - Logs are saved in the `logs/` directory.
 
 ## Notes
 
 - For large datasets, increase `--parallel` for faster processing.
-- user Dockerfile to build the images used for the isolated analysis (requires Docker).
+- Bullseye analyze each package in a sanbox, use Dockerfile to build the image from which the containers will be created (requires Docker).
 - The script supports both ESM and CommonJS npm packages.
 
 ## License

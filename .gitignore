@@ -10,3 +10,5 @@ scripts
 *.bak
 ASTwarnings.txt
 fuzzUtils/
+npm
+raw-data

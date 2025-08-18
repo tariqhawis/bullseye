@@ -21,6 +21,7 @@ const argv = yargs
   .option("npmPath", {
     describe: "NPM package installation path, e.g., /home/benchmark",
     type: "string",
+    default: `${projDir}/npm`,
   })
   .option("tool", {
     describe: "the path to the tool to run, use related path from the prject directory, e.g., scripts/fuzzproto.mjs",
@@ -82,7 +83,9 @@ let allTimestamp = Date.now();
 //const cache = fs.readFileSync('../npm_45k_loc.txt', { encoding: 'utf8' })
 let i = 0;
 const currentPath = process.cwd();
-const projDir = "/home/tariq/bullseye";
+const path = require("path");
+const projDir = path.resolve(__dirname);
+
 let inputPath = null;
 
 const benchPath = argv.npmPath; // "/home/benchmark/npm47k_Jul21";

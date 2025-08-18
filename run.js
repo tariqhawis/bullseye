@@ -4,15 +4,13 @@ const fs = require("fs");
 const { execSync, spawnSync, spawn, exec } = require("child_process");
 const yargs = require("yargs");
 const Docker = require("dockerode");
-//const { npmInit } = require("../utils/dataUtils.js");
 const path = require("path");
 const glob = require("glob");
 const process = require("process");
-const APIKEY ="token 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"; // Replace with your actual GitHub API token
+const APIKEY = "token ghp_oDZnjOh1ww5Xrm4UKQBEAXXFs6feCe1h1SSS"; // Replace with your actual GitHub API token
 const currentPath = process.cwd();
-const projDir = "/home/tariq/bullseye";
-//const { fetchMetadata } = require("../fuzzUtils/packageInit.js");
-const { githubRequest } = require(`${projDir}/fuzzUtils/dataUtils.js`);
+const projDir = path.resolve(__dirname);
+
 const lib = require("p-limit");
 const { promisify } = require("util");
 const appendFile = promisify(fs.appendFile);
@@ -24,15 +22,21 @@ const argv = yargs
       "JSON file containing the list of packages (e.g., {package_name, version}) or a single package (e.g., package_name@version)",
     type: "string",
   })
+  .option("format", {
+    describe: "the format used for naming the package's folder, e.g., ss, odgen",
+    type: "string",
+    default: "default",
+    choices: ["ss", "odgen", "default"],
+  })
+  .option("npmPath", {
+    describe: "NPM package installation path, e.g., /home/benchmark",
+    type: "string",
+    default: `${projDir}/npm`,
+  })
   .option("tool", {
     describe: "the path to the tool to run, use related path from the prject directory, e.g., fuzzproto.mjs",
     type: "string",
     default: "bullseye.mjs",
-  })
-  .option("install", {
-    describe: "install the package before run the tool",
-    type: "boolean",
-    default: false,
   })
   .option("vm", {
     describe: "run entry points within node.js VM",
@@ -81,7 +85,6 @@ const calcTime = (time, final) => {
 console.info(`Run at ${new Date().toLocaleString()}, started with the following options:`);
 console.info(`Tool ${argv.tool}`);
 console.info(`Input: ${argv.input}`);
-console.info(`Install: ${argv.install}`);
 console.info(`VM: ${argv.vm}`);
 console.info(`Sandbox: ${argv.sandbox}`);
 console.info(`Output: ${argv.output}`);
@@ -93,12 +96,13 @@ let allTimestamp = Date.now();
 
 let i = 0;
 
-let inputPath = null;
- inputPath = `${projDir}/dataset/npm47k.json`;
-const benchPath = `${projDir}/benchmark/npm47k`;
+let inputPath = null,
+  npmPath = null;
+inputPath = `${projDir}/dataset/npm47k.json`;
+npmPath = `${projDir}/npm`;
 
 const input = argv.input ? argv.input : inputPath !== null ? inputPath : null;
-
+const benchPath = argv.npmPath ? argv.npmPath : npmPath !== null ? npmPath : null;
 if (input)
   if (input.includes(".json")) {
     dataset = JSON.parse(fs.readFileSync(input, { encoding: "utf8" }));
@@ -108,7 +112,7 @@ if (input)
     dataset = [input];
   }
 else {
-// use this for troubleshooting
+  // use this for troubleshooting
   dataset = [
     {
       package_name: "node-forge",
@@ -120,9 +124,8 @@ else {
 const logText = new Date().toISOString().replace(/:/g, "-").replace(/T/g, "_").split(".")[0];
 const suffix = `${input ? input.replace(/.*\/([^\/]+)$/, "$1") : "default"}.${logText}`;
 // the base path for benchmark drictory
-const dirPath = "benchmark";
-const outputFile = `${projDir}/${dirPath}/${argv.tool.replace(/.*\/([^\/]+)$/, "$1")}.${suffix}.json`;
-const tempFile = `${projDir}/${dirPath}/${argv.tool.replace(/.*\/([^\/]+)$/, "$1")}.${suffix}.txt`;
+const outputFile = `${projDir}/raw-data/${argv.tool.replace(/.*\/([^\/]+)$/, "$1")}.${suffix}.json`;
+const tempFile = `${projDir}/raw-data/${argv.tool.replace(/.*\/([^\/]+)$/, "$1")}.${suffix}.txt`;
 const logFile = `${projDir}/logs/${suffix}.log`;
 const pLimit = lib.default;
 const limit = pLimit(argv.parallel || 1); // Adjust concurrency level
@@ -157,6 +160,7 @@ async function processQueue(file) {
 (async () => {
   let counter = 0;
   let pkgList = [];
+  let pkgLib = "";
   const tasks = dataset.map((pkg) =>
     limit(async () => {
       counter++;
@@ -174,19 +178,25 @@ async function processQueue(file) {
       } else if (typeof pkg === "string") {
         [, pkgName, version] = pkg.split(",")[0].match(/^(@?[^@]+)@?(.*)/);
       }
-      //if (argv.latest) {
-      const response = await fetch(`https://registry.npmjs.org/${pkgName}`);
-      pkgMeta = await response.json();
-      version = pkgMeta.versions[pkgMeta["dist-tags"].latest].version;
-      //}
-      const pkgLib =
-        pkgName
-          .replace(/^(\d)/, "a$1")
-          .replace(/^@/, "")
-          .replace(/[:\-\./]/g, "_") +
-        "-" +
-        version;
+      // if (argv.latest) {
+      //   const response = await fetch(`https://registry.npmjs.org/${pkgName}`);
+      //   pkgMeta = await response.json();
+      //   version = pkgMeta.versions[pkgMeta["dist-tags"].latest].version;
+      // }
+      if (argv.format === "ss")
+        // use the pattern name used in the ss dataset "package-version", with replacing special characters by "_"
+        pkgLib =
+          pkgName
+            .replace(/^(\d)/, "a$1")
+            .replace(/^@/, "")
+            .replace(/[:\-\./]/g, "_") +
+          "-" +
+          version;
+      else if (argv.format === "odgen")
+        // use the pattern name used in the odgen dataset "package@version"
+        pkgLib = pkgName + "@" + version;
       const fullPath = `${benchPath}/${pkgLib}`;
+      console.log(fullPath);
       const pkgFolder = glob.sync(fullPath);
       const repoFolderName = [
         pkgName
@@ -210,14 +220,13 @@ async function processQueue(file) {
           unknownSideEffect: false,
         },
       };
-      
+
       // start exploiting the packages
       try {
         // for the first object, write the opening bracket
-   
+
         const { toolOutput, stats, duration } = await sandboxRun(pkgObj, pkgLib, argv.timeout);
-        
-       
+
         return {
           package: pkg,
           duration,
@@ -232,7 +241,6 @@ async function processQueue(file) {
   );
   const allResults = await Promise.all(tasks);
   try {
-
     fs.writeFileSync(outputFile, JSON.stringify(allResults), "utf8");
   } catch (error) {
     console.log(error);
@@ -240,7 +248,6 @@ async function processQueue(file) {
   console.log("All packages processed!");
 
   process.chdir(currentPath);
-
 })()
   .catch((e) => {
     console.error(e);
@@ -293,7 +300,6 @@ async function sandboxRun(pkg, pkgLib, timeout = 120000) {
             ReadOnly: false, // Specify read/write permissions
           },
         ],
-
       },
     });
 
@@ -316,8 +322,6 @@ async function sandboxRun(pkg, pkgLib, timeout = 120000) {
       }
     }, CHECK_INTERVAL);
 
-
-
     //const outputPromise = new Promise(async (resolve, reject) => {
     try {
       const stream = await container.attach({ stream: true, stdout: true, stderr: true });
@@ -335,7 +339,6 @@ async function sandboxRun(pkg, pkgLib, timeout = 120000) {
           safeWrite(JSON.stringify({ package: `${pkg.package_name}@${pkg.version}`, results: parsed }));
         } else if (chunk.search(/<STATS>(.*)<\/STATS>/) > -1) {
           stats = JSON.parse(chunk.trim().match(/<STATS>(.*)<\/STATS>/)[1]);
-
         } else {
           buffer += chunk; // Append incoming data
 
@@ -397,7 +400,7 @@ async function sandboxRun(pkg, pkgLib, timeout = 120000) {
       if (containerStatus.State.Running) {
         await container.stop();
       }
-      await container.remove({ force: true });
+      //await container.remove({ force: true });
     }
     // return toolOutput;
   }
@@ -570,11 +573,11 @@ async function refineReport(pkgReports) {
         }
       }
   }
-  
+
   return refinedRes;
 }
 
-async function githubRequest1(query, method = "GET", API = APIKEY) {
+async function githubRequest(query, method = "GET", API = APIKEY) {
   try {
     const { Octokit } = await import("octokit");
     //const octokit = new Octokit({});
