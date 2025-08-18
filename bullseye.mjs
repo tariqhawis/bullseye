@@ -12,7 +12,8 @@ var parsedObject = [];
 var victim = {};
 var someObj = {};
 
-// const projPath = "/home/xxxx/bulldeye"; // for troubleshooting
+// for troubleshooting:  1- uncomment the following line, pointing to the host path of the project, and comment the next line
+// const projPath = "/home/xxxx/bullseye";
 const projPath = "/usr/src/app"; // docker path
 const fixedCases = JSON.parse(fs.readFileSync(`${projPath}/fuzzPaterns.json`, "utf-8"));
 let pkg = {};
@@ -20,6 +21,7 @@ let pkg = {};
 if (process.argv[2]) {
   pkg = JSON.parse(process.argv[2]);
 } else {
+  // 2. replace the following package and version with the package you want to test.
   pkg = {
     package_name: "assign-deep", // import issue
     version: "1.0.0",
@@ -65,12 +67,10 @@ let pkgTimestamp = Date.now();
   let detectionArray = [];
   let detectedSink = new Set();
 
-  const { importGlobalNameSpace, importModule, findTestFiles } = await import(`${projPath}/fuzzUtils/packageInit.js`);
-  const { generateExploits } = await import(`${projPath}/fuzzUtils/exploitGenerator.js`);
-  const { analyzeTestCase, findCallOfInterest } = await import(`${projPath}/fuzzUtils/testInputExtraction.js`);
-  const { cleanUpProto, copyPrototypeChain, decodeStr, verify } = await import(
-    `${projPath}/fuzzUtils/functionHandler.js`
-  );
+  const { importGlobalNameSpace, importModule, findTestFiles } = await import(`${projPath}/packageInit.js`);
+  const { generateExploits } = await import(`${projPath}/exploitGenerator.js`);
+  const { analyzeTestCase, findCallOfInterest } = await import(`${projPath}/testInputExtraction.js`);
+  const { cleanUpProto, copyPrototypeChain, decodeStr, verify } = await import(`${projPath}/functionHandler.js`);
 
   try {
     const results = await loadPackage(`${pkgPath}/node_modules/${pkg.package_name}`);

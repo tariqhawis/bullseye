@@ -2,27 +2,17 @@
 
 This project provides a script, [`run.js`](run.js), for automated prototype pollution vulnerability analysis of npm packages. It supports running tools in various modes, including Docker sandboxing and Node.js VM contexts, and can process large datasets in parallel.
 
+## Reference
+
+This repository contains the implementation prototype of the approach described in our accepted paper at NDSS 2026. If you use this code, please cite our NDSS'26 paper.
+
 ## Bullseye Directory Tree
 
 ```bash
 .
-├── baselines  // The directory of the baseline tools and the separated components of bullseye "used in the ablation study"
-│   ├── arteauEnum.mjs
-│   ├── arteauInit.mjs
-│   ├── arteauLoad.mjs
-│   ├── bullseye_fnEnum.mjs
-│   ├── bullseye_inputs_sideEffect.mjs
-│   ├── bullseye_inputs_vm_sideEffect.mjs
-│   ├── bullseye_inputs_vm.mjs
-│   ├── bullseye_inputs.mjs
-│   ├── bullseye_load_fnEnum.mjs
-│   ├── bullseye_load.mjs
-│   ├── bullseye_sideEffect.mjs
-│   ├── bullseye_vm.mjs
-│   ├── enumLoadOriginal.mjs
-│   ├── payloads.txt
-│   ├── vuln-finder-arteau.js
-│   └── vuln-finder-zhou.js
+├── benchmark  // The benchmark scripts and result artifacts
+│   ├── bullseye.vs.ablation
+│   └── bullseye.vs.baselines
 ├── bullseye.mjs // The actual analysis file run each time a package is invoked in the sandbox for the analysis
 ├── Dockerfile
 ├── functionHandler.js   // utilities for handling functions enumeration
