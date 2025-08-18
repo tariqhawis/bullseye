@@ -1,5 +1,4 @@
 dataset
-logs/*
 node_modules
 package-lock.json
 scripts
@@ -10,4 +9,8 @@ scripts
 ASTwarnings.txt
 fuzzUtils
 npm/*
+!npm/.gitkeep
 raw-data/*
+!raw-data/.gitkeep
+logs/*
+!logs/.gitkeep
